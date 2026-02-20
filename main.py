@@ -67,47 +67,15 @@ def safe_task(coro, name: str):
 @app.on_event("startup")
 async def startup_systems():
 
-    print("🚀 Jarvis Startup Initiated")
+    print("🚀 Jarvis SAFE STARTUP MODE")
 
-    # ---- Schedulers ----
-    safe_task(incident_scheduler.run_loop, "Incident Scheduler")
-    safe_task(reflection_scheduler.run_loop, "Reflection Engine")
-    safe_task(orchestrator_scheduler.run_loop, "Orchestrator")
-    safe_task(policy_scheduler.run_loop, "Policy Engine")
-    safe_task(allocation_scheduler.run_loop, "Allocation Engine")
-    safe_task(growth_scheduler.run_loop, "Growth Scheduler")
-
-    # ---- Observers ----
-    asyncio.create_task(start_observers())
-    print("👁️ Observer system started")
-
-    # ---- Continuous Learning (Thread) ----
-    def start_learning_loop():
-        try:
-            ContinuousLearning.run_loop()
-        except Exception as e:
-            print("[Learning ERROR]", e)
-
-    threading.Thread(
-        target=start_learning_loop,
-        daemon=True
-    ).start()
-
-    print("🧠 Learning Thread Started")
-
-    # ---- Goal Aging Loop ----
-    async def aging_loop():
+    # ---- TEST ONLY ONE TASK ----
+    async def heartbeat():
         while True:
-            try:
-                goal_aging_engine.run_cycle()
-                print("[Aging] cycle executed")
-            except Exception as e:
-                print("[Aging ERROR]", e)
+            print("❤️ Jarvis alive")
+            await asyncio.sleep(20)
 
-            await asyncio.sleep(300)
-
-    asyncio.create_task(aging_loop())
-    print("🧬 Goal Aging System Started")
+    asyncio.create_task(heartbeat())
 
 
 # =====================================================
