@@ -8,7 +8,22 @@ from fastapi import FastAPI
 # -----------------------------------------------------
 # CREATE FASTAPI APP
 # -----------------------------------------------------
-app = FastAPI(
+from fastapi import FastAPI
+import asyncio
+
+app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return {"message": "Jarvis Core Online"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+    app = FastAPI(
     title="Jarvis Marketing Brain",
     version="0.1.0"
 )
@@ -22,13 +37,14 @@ async def startup():
     print("🚀 SAFE CORE BOOT STARTED")
 
     async def heartbeat():
-        while True:
-            print("❤️ Jarvis alive")
-            await asyncio.sleep(20)
+    while True:
+        print("[HEARTBEAT] Core alive...")
+        await asyncio.sleep(30)
 
+
+@app.on_event("startup")
+async def start_heartbeat():
     asyncio.create_task(heartbeat())
-
-    print("✅ SAFE CORE READY")
 
 
 # -----------------------------------------------------
