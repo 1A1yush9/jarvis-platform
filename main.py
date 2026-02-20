@@ -1,63 +1,52 @@
-# =====================================================
-# Jarvis Marketing Brain - SAFE CORE BOOT
-# =====================================================
-
-import asyncio
-from fastapi import FastAPI
-
-# -----------------------------------------------------
-# CREATE FASTAPI APP
-# -----------------------------------------------------
 from fastapi import FastAPI
 import asyncio
 
 app = FastAPI()
 
 
+# -------------------------
+# ROOT ENDPOINT
+# -------------------------
 @app.get("/")
 async def root():
     return {"message": "Jarvis Core Online"}
 
 
+# -------------------------
+# HEALTH CHECK
+# -------------------------
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-    app = FastAPI(
-    title="Jarvis Marketing Brain",
-    version="0.1.0"
-)
 
-# -----------------------------------------------------
-# STARTUP (SAFE MODE ONLY)
-# -----------------------------------------------------
-@app.on_event("startup")
-async def startup():
-
-    print("🚀 SAFE CORE BOOT STARTED")
-
-    async def heartbeat():
+# -------------------------
+# HEARTBEAT LOOP
+# -------------------------
+async def heartbeat():
     while True:
         print("[HEARTBEAT] Core alive...")
         await asyncio.sleep(30)
 
 
+# -------------------------
+# STARTUP EVENT
+# -------------------------
 @app.on_event("startup")
 async def start_heartbeat():
     asyncio.create_task(heartbeat())
+    # -------------------------
+# HEARTBEAT LOOP
+# -------------------------
+async def heartbeat():
+    while True:
+        print("[HEARTBEAT] Core alive...")
+        await asyncio.sleep(30)
 
 
-# -----------------------------------------------------
-# BASIC ROUTES
-# -----------------------------------------------------
-@app.get("/")
-async def root():
-    return {"status": "Jarvis running"}
-
-
-@app.get("/health")
-async def health():
-    return {
-        "status": "healthy",
-        "service": "jarvis-platform"
-    }
+# -------------------------
+# STARTUP EVENT
+# -------------------------
+@app.on_event("startup")
+async def start_heartbeat():
+    asyncio.create_task(heartbeat())
