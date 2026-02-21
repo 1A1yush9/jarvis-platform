@@ -3,21 +3,16 @@ from fastapi import FastAPI, Request
 from brains.signal_awareness import signal_awareness
 from brains.memory_buffer import memory_buffer
 from brains.pattern_observer import pattern_observer
+from brains.intent_classifier import intent_classifier
 
 app = FastAPI(title="Jarvis Core")
 
 
-# -------------------------------------------------
-# Startup
-# -------------------------------------------------
 @app.on_event("startup")
 async def startup_event():
     signal_awareness.observe_event("system_startup")
 
 
-# -------------------------------------------------
-# Middleware (Passive Observation)
-# -------------------------------------------------
 @app.middleware("http")
 async def signal_listener(request: Request, call_next):
 
@@ -35,9 +30,6 @@ async def signal_listener(request: Request, call_next):
     return response
 
 
-# -------------------------------------------------
-# Core Endpoints
-# -------------------------------------------------
 @app.get("/")
 def root():
     return {"message": "Jarvis Core Running"}
@@ -58,10 +50,19 @@ def memory():
     return memory_buffer.report()
 
 
-# -------------------------------------------------
-# NEW: Pattern Analytics
-# -------------------------------------------------
 @app.get("/patterns/report")
 def patterns():
     memory = memory_buffer.report()["recent_memory"]
     return pattern_observer.analyze(memory)
+
+
+# -------------------------------
+# NEW: Intent Classification
+# -------------------------------
+@app.get("/intent/report")
+def intent():
+
+    memory = memory_buffer.report()["recent_memory"]
+    pattern_data = pattern_observer.analyze(memory)
+
+    return intent_classifier.classify(pattern_data)
