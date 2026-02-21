@@ -2,25 +2,25 @@ from fastapi import FastAPI, Request
 
 from brains.signal_awareness import signal_awareness
 from brains.memory_buffer import memory_buffer
+from brains.pattern_observer import pattern_observer
 
 app = FastAPI(title="Jarvis Core")
 
 
-# =====================================================
-# STARTUP EVENT
-# =====================================================
+# -------------------------------------------------
+# Startup
+# -------------------------------------------------
 @app.on_event("startup")
 async def startup_event():
     signal_awareness.observe_event("system_startup")
 
 
-# =====================================================
-# SIGNAL LISTENER (PASSIVE)
-# =====================================================
+# -------------------------------------------------
+# Middleware (Passive Observation)
+# -------------------------------------------------
 @app.middleware("http")
 async def signal_listener(request: Request, call_next):
 
-    # observe request
     signal_awareness.observe_request(
         path=request.url.path,
         method=request.method
@@ -28,7 +28,6 @@ async def signal_listener(request: Request, call_next):
 
     response = await call_next(request)
 
-    # store snapshot AFTER response (non-blocking)
     memory_buffer.store_snapshot(
         signal_awareness.report()
     )
@@ -36,9 +35,9 @@ async def signal_listener(request: Request, call_next):
     return response
 
 
-# =====================================================
-# BASIC ENDPOINTS
-# =====================================================
+# -------------------------------------------------
+# Core Endpoints
+# -------------------------------------------------
 @app.get("/")
 def root():
     return {"message": "Jarvis Core Running"}
@@ -49,17 +48,20 @@ def health():
     return {"status": "healthy"}
 
 
-# =====================================================
-# SIGNAL REPORT
-# =====================================================
 @app.get("/signals/report")
-def signal_report():
+def signals():
     return signal_awareness.report()
 
 
-# =====================================================
-# MEMORY REPORT (NEW)
-# =====================================================
 @app.get("/memory/report")
-def memory_report():
+def memory():
     return memory_buffer.report()
+
+
+# -------------------------------------------------
+# NEW: Pattern Analytics
+# -------------------------------------------------
+@app.get("/patterns/report")
+def patterns():
+    memory = memory_buffer.report()["recent_memory"]
+    return pattern_observer.analyze(memory)
