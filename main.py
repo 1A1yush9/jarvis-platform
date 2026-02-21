@@ -10,7 +10,7 @@ except Exception:
     observer_brain = None
 
 # ---- NEW Signal Awareness ----
-from .brains.signal_awareness import signal_awareness
+from brains.signal_awareness import signal_awareness
 
 
 app = FastAPI(title="Jarvis Core")
