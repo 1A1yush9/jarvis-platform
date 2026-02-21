@@ -1,7 +1,6 @@
 from .state_collector import collect_system_state
 from .insight_analyzer import analyze_state
 
-
 class ObserverBrain:
 
     def observe(self):
