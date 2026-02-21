@@ -6,6 +6,7 @@ from brains.pattern_observer import pattern_observer
 from brains.intent_classifier import intent_classifier
 from brains.adaptive_awareness import adaptive_awareness
 from brains.stability_guardian import stability_guardian
+from brains.decision_simulator import decision_simulator
 
 app = FastAPI(title="Jarvis Core")
 
@@ -73,18 +74,33 @@ def awareness():
     return adaptive_awareness.evaluate(intent_data)
 
 
-# -----------------------------
-# NEW: Stability Guardian
-# -----------------------------
 @app.get("/guardian/report")
 def guardian():
+    memory_data = memory_buffer.report()
+    pattern_data = pattern_observer.analyze(
+        memory_data["recent_memory"]
+    )
+    return stability_guardian.evaluate(memory_data, pattern_data)
+
+
+# -----------------------------
+# NEW: Decision Simulation
+# -----------------------------
+@app.get("/decision/report")
+def decision():
 
     memory_data = memory_buffer.report()
     pattern_data = pattern_observer.analyze(
         memory_data["recent_memory"]
     )
 
-    return stability_guardian.evaluate(
-        memory_data,
-        pattern_data
+    intent_data = intent_classifier.classify(pattern_data)
+    awareness_data = adaptive_awareness.evaluate(intent_data)
+    guardian_data = stability_guardian.evaluate(
+        memory_data, pattern_data
+    )
+
+    return decision_simulator.simulate(
+        awareness_data,
+        guardian_data
     )
