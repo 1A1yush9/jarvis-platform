@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 import asyncio
 
+from app.observer.observer_router import router as observer_router
+
+app.include_router(observer_router)
+
 # create app ONLY ONCE
 app = FastAPI()
 
