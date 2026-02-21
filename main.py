@@ -1,43 +1,71 @@
-from fastapi import FastAPI
-import asyncio
+# jarvis/main.py
 
-# -------------------------
-# CREATE APP FIRST
-# -------------------------
-app = FastAPI()
+from fastapi import FastAPI, Request
+import time
 
-# -------------------------
-# LOAD ROUTERS
-# -------------------------
-from app.observer.observer_router import router as observer_router
+# ---- Existing Observer import (keep if already used) ----
+try:
+    from jarvis.brains.observer import observer_brain
+except Exception:
+    observer_brain = None
 
-app.include_router(observer_router)
+# ---- NEW Signal Awareness ----
+from jarvis.brains.signal_awareness import signal_awareness
 
-# -------------------------
-# ROOT ENDPOINT
-# -------------------------
-@app.get("/")
-async def root():
-    return {"message": "Jarvis Core Online"}
 
-# -------------------------
-# HEALTH CHECK
-# -------------------------
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
+app = FastAPI(title="Jarvis Core")
 
-# -------------------------
-# HEARTBEAT LOOP
-# -------------------------
-async def heartbeat():
-    while True:
-        print("[HEARTBEAT] Core alive...")
-        await asyncio.sleep(30)
 
-# -------------------------
-# STARTUP EVENT
-# -------------------------
+# =========================================================
+# HEARTBEAT LOOP (SAFE BACKGROUND)
+# =========================================================
 @app.on_event("startup")
-async def start_heartbeat():
-    asyncio.create_task(heartbeat())
+async def startup_event():
+    signal_awareness.observe_event("system_startup")
+
+
+# =========================================================
+# SIGNAL LISTENER MIDDLEWARE (PASSIVE)
+# =========================================================
+@app.middleware("http")
+async def signal_listener(request: Request, call_next):
+
+    # observe request safely
+    signal_awareness.observe_request(
+        path=request.url.path,
+        method=request.method
+    )
+
+    response = await call_next(request)
+    return response
+
+
+# =========================================================
+# BASIC ENDPOINTS
+# =========================================================
+@app.get("/")
+def root():
+    return {"message": "Jarvis Core Running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
+
+# =========================================================
+# OBSERVER REPORT (if exists)
+# =========================================================
+@app.get("/observer/report")
+def observer_report():
+    if observer_brain:
+        return observer_brain.report()
+    return {"observer": "not_loaded"}
+
+
+# =========================================================
+# SIGNAL REPORT (NEW)
+# =========================================================
+@app.get("/signals/report")
+def signal_report():
+    return signal_awareness.report()
