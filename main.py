@@ -4,6 +4,7 @@ from brains.signal_awareness import signal_awareness
 from brains.memory_buffer import memory_buffer
 from brains.pattern_observer import pattern_observer
 from brains.intent_classifier import intent_classifier
+from brains.adaptive_awareness import adaptive_awareness
 
 app = FastAPI(title="Jarvis Core")
 
@@ -56,13 +57,21 @@ def patterns():
     return pattern_observer.analyze(memory)
 
 
-# -------------------------------
-# NEW: Intent Classification
-# -------------------------------
 @app.get("/intent/report")
 def intent():
+    memory = memory_buffer.report()["recent_memory"]
+    pattern_data = pattern_observer.analyze(memory)
+    return intent_classifier.classify(pattern_data)
+
+
+# -----------------------------
+# NEW: Adaptive Awareness
+# -----------------------------
+@app.get("/awareness/report")
+def awareness():
 
     memory = memory_buffer.report()["recent_memory"]
     pattern_data = pattern_observer.analyze(memory)
+    intent_data = intent_classifier.classify(pattern_data)
 
-    return intent_classifier.classify(pattern_data)
+    return adaptive_awareness.evaluate(intent_data)
