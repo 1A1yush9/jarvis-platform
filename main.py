@@ -8,6 +8,7 @@ from brains.adaptive_awareness import adaptive_awareness
 from brains.stability_guardian import stability_guardian
 from brains.decision_simulator import decision_simulator
 from brains.strategic_thinker import strategic_thinker
+from brains.meta_cognition import meta_cognition
 
 app = FastAPI(title="Jarvis Core")
 
@@ -104,9 +105,6 @@ def decision():
     )
 
 
-# -----------------------------
-# NEW: Strategic Thinking
-# -----------------------------
 @app.get("/strategy/report")
 def strategy():
 
@@ -127,3 +125,35 @@ def strategy():
     )
 
     return strategic_thinker.project(decision_data)
+
+
+# -----------------------------
+# NEW: Meta Cognition
+# -----------------------------
+@app.get("/meta/report")
+def meta():
+
+    memory_data = memory_buffer.report()
+    pattern_data = pattern_observer.analyze(
+        memory_data["recent_memory"]
+    )
+
+    intent_data = intent_classifier.classify(pattern_data)
+    awareness_data = adaptive_awareness.evaluate(intent_data)
+
+    guardian_data = stability_guardian.evaluate(
+        memory_data,
+        pattern_data
+    )
+
+    decision_data = decision_simulator.simulate(
+        awareness_data,
+        guardian_data
+    )
+
+    strategy_data = strategic_thinker.project(decision_data)
+
+    return meta_cognition.reflect(
+        awareness_data,
+        strategy_data
+    )
