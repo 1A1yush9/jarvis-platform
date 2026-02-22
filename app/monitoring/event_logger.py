@@ -8,25 +8,18 @@ LOG_PATH = Path("jarvis_events.json")
 
 
 class EventLogger:
-    """
-    Stage-4.3 Logging Layer
-    - Console logging
-    - JSON persistent logging
-    - Future DB hook ready
-    """
 
-    def log(self, event_type: str, payload: dict):
+    def log(self, event_type: str, payload: dict, client_id: str = "global"):
 
         record = {
             "timestamp": datetime.utcnow().isoformat(),
+            "client_id": client_id,
             "event_type": event_type,
             "payload": payload,
         }
 
-        # Console log
         print(f"[JARVIS EVENT] {record}")
 
-        # File log (safe append)
         try:
             if LOG_PATH.exists():
                 data = json.loads(LOG_PATH.read_text())
@@ -38,9 +31,6 @@ class EventLogger:
 
         except Exception as e:
             print(f"[LOGGER ERROR] {e}")
-
-        # ---- FUTURE DATABASE HOOK (Stage-B ready) ----
-        # self.send_to_database(record)
 
 
 event_logger = EventLogger()

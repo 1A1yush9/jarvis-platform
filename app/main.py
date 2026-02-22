@@ -5,21 +5,23 @@ from pydantic import BaseModel
 
 from app.core.system_state import system_state
 from app.core.action_gateway import action_gateway
+from app.core.client_context import client_context
 from app.monitoring.event_logger import event_logger
 from app.observer.activity_observer import observer
 from app.observer.adaptive_engine import adaptive_engine
 
-app = FastAPI(title="Jarvis Platform", version="4.5")
+app = FastAPI(title="Jarvis Platform", version="5.0")
 
 
 class ActionRequest(BaseModel):
+    client_id: str
     action: str
     payload: dict = {}
 
 
 @app.get("/")
 def root():
-    return {"message": "Jarvis API Running"}
+    return {"message": "Jarvis Platform Running"}
 
 
 @app.get("/system/status")
@@ -41,15 +43,24 @@ def adaptive_recommendations():
 def execute_action(request: ActionRequest):
 
     try:
+        # Create / load isolated client context
+        client_context.get_client(request.client_id)
+
+        # Validate action
         action_gateway.validate(request.action, request.payload)
 
         result = {
+            "client_id": request.client_id,
             "message": "Action executed successfully",
             "action": request.action,
             "payload": request.payload,
         }
 
-        event_logger.log("action_executed", result)
+        event_logger.log(
+            "action_executed",
+            result,
+            client_id=request.client_id,
+        )
 
         return result
 
