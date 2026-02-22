@@ -10,14 +10,27 @@ SIGNAL_FILE = f"{DATA_PATH}/growth_signals.json"
 ACTION_FILE = f"{DATA_PATH}/growth_actions.json"
 
 
+# ---------------------------------
+# ENSURE DATABASE DIRECTORY EXISTS
+# ---------------------------------
+def ensure_database():
+    if not os.path.exists(DATA_PATH):
+        os.makedirs(DATA_PATH, exist_ok=True)
+
+
 def _load(path):
+    ensure_database()
+
     if not os.path.exists(path):
         return []
+
     with open(path, "r") as f:
         return json.load(f)
 
 
 def _save(path, data):
+    ensure_database()
+
     with open(path, "w") as f:
         json.dump(data, f, indent=2, default=str)
 
@@ -95,7 +108,7 @@ def execute_approved_actions():
     actions = _load(ACTION_FILE)
 
     for action in actions:
-        if action["approved"] and not action["executed"]:
+        if action.get("approved") and not action.get("executed"):
             print(f"Executing growth action for {action['client_id']}")
             action["executed"] = True
 
