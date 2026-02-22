@@ -1,138 +1,65 @@
 # app/main.py
 
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-import time
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-# ---- Jarvis Core Imports ----
-from app.core.execution_pipeline import (
-    propose_action,
-    execute_with_token
-)
+from app.core.system_state import system_state
+from app.core.action_gateway import action_gateway
+from app.monitoring.event_logger import event_logger
 
-from app.core.human_authorization import approve_token
+app = FastAPI(title="Jarvis Platform", version="4.3")
 
 
-# ==========================================================
-# FASTAPI APPLICATION
-# ==========================================================
-
-app = FastAPI(
-    title="Jarvis Cognitive System",
-    description="Human-Governed AI Execution Platform",
-    version="4.3"
-)
-
-START_TIME = time.time()
+# ---------------------------
+# Request Schema
+# ---------------------------
+class ActionRequest(BaseModel):
+    action: str
+    payload: dict = {}
 
 
-# ==========================================================
-# ROOT + HEALTH CHECK
-# ==========================================================
+# ---------------------------
+# System Health Endpoint
+# ---------------------------
+@app.get("/system/status")
+def system_status():
+    return system_state.health()
 
+
+# ---------------------------
+# Core Action Endpoint
+# ---------------------------
+@app.post("/action")
+def execute_action(request: ActionRequest):
+
+    try:
+        # Validate action
+        action_gateway.validate(request.action, request.payload)
+
+        # Simulated execution (Stage-4.3 base)
+        result = {
+            "message": "Action executed successfully",
+            "action": request.action,
+            "payload": request.payload,
+        }
+
+        event_logger.log(
+            "action_executed",
+            result,
+        )
+
+        return result
+
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------
+# Root Endpoint
+# ---------------------------
 @app.get("/")
 def root():
-    return {
-        "system": "Jarvis",
-        "status": "ONLINE",
-        "stage": "4.3 - Human Authorization Layer Active"
-    }
-
-
-@app.get("/health")
-def health():
-    uptime = round(time.time() - START_TIME, 2)
-
-    return {
-        "status": "healthy",
-        "uptime_seconds": uptime,
-        "execution_mode": "HUMAN_AUTH_REQUIRED"
-    }
-
-
-@app.get("/jarvis/status")
-def jarvis_status():
-    return {
-        "cognitive_stack": "ACTIVE",
-        "autonomous_execution": False,
-        "human_authorization": "REQUIRED",
-        "sandbox": "ENABLED",
-        "capability_gate": "ENFORCED"
-    }
-
-
-# ==========================================================
-# HUMAN AUTHORIZATION FLOW
-# ==========================================================
-
-@app.post("/jarvis/propose")
-def jarvis_propose(action: dict):
-    """
-    Jarvis proposes an action.
-    Execution waits for human approval.
-    """
-    try:
-        response = propose_action(action)
-        return JSONResponse(content=response)
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "ERROR",
-                "message": str(e)
-            }
-        )
-
-
-@app.post("/jarvis/approve/{token}")
-def jarvis_approve(token: str):
-    """
-    Human approves proposed action.
-    """
-    try:
-        result = approve_token(token)
-        return JSONResponse(content=result)
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "ERROR",
-                "message": str(e)
-            }
-        )
-
-
-@app.post("/jarvis/execute/{token}")
-def jarvis_execute(token: str):
-    """
-    Executes only after approval token validation.
-    """
-    try:
-        result = execute_with_token(token)
-        return JSONResponse(content=result)
-
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "status": "ERROR",
-                "message": str(e)
-            }
-        )
-
-
-# ==========================================================
-# GLOBAL ERROR HANDLER (PREVENT RENDER RESTART LOOPS)
-# ==========================================================
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "status": "SYSTEM_ERROR",
-            "detail": str(exc)
-        },
-    )
+    return {"message": "Jarvis API Running"}
