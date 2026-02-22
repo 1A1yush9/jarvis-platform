@@ -8,11 +8,12 @@ from app.core.action_gateway import action_gateway
 from app.core.client_context import client_context
 from app.core.auth_manager import auth_manager
 from app.core.usage_meter import usage_meter
+from app.core.admin_manager import admin_manager
 from app.monitoring.event_logger import event_logger
 from app.observer.activity_observer import observer
 from app.observer.adaptive_engine import adaptive_engine
 
-app = FastAPI(title="Jarvis Platform", version="5.2")
+app = FastAPI(title="Jarvis Platform", version="5.3")
 
 
 class ActionRequest(BaseModel):
@@ -20,6 +21,10 @@ class ActionRequest(BaseModel):
     api_key: str
     action: str
     payload: dict = {}
+
+
+class AdminRequest(BaseModel):
+    admin_key: str
 
 
 @app.get("/")
@@ -47,20 +52,36 @@ def usage_summary(client_id: str):
     return usage_meter.summary(client_id)
 
 
+# ---------------------------
+# 🔐 ADMIN ENDPOINTS
+# ---------------------------
+
+@app.post("/admin/clients")
+def admin_clients(request: AdminRequest):
+    admin_manager.verify_admin(request.admin_key)
+    return admin_manager.system_clients()
+
+
+@app.post("/admin/usage")
+def admin_usage(request: AdminRequest):
+    admin_manager.verify_admin(request.admin_key)
+    return admin_manager.usage_overview()
+
+
+# ---------------------------
+# CLIENT ACTION
+# ---------------------------
+
 @app.post("/action")
 def execute_action(request: ActionRequest):
 
     try:
-        # 🔐 Authenticate
         auth_manager.verify(request.client_id, request.api_key)
 
-        # 👤 Client context
         client_context.get_client(request.client_id)
 
-        # 💰 Record usage
         usage_meter.record(request.client_id, request.action)
 
-        # 🧠 Validate action
         action_gateway.validate(request.action, request.payload)
 
         result = {
