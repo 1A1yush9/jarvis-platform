@@ -6,13 +6,12 @@ from app.strategy.strategy_engine import (
     update_strategic_memory,
     generate_strategy_insights
 )
+from app.prediction.prediction_router import router as prediction_router
+from app.prediction.prediction_engine import generate_predictions
 
 app = FastAPI(title="Jarvis Platform")
 
 
-# ---------------------------------
-# MOCK USAGE SOURCE
-# ---------------------------------
 def get_usage_metrics():
     return [
         {"client_id": "client_a", "requests": 1500, "revenue": 700},
@@ -25,16 +24,20 @@ async def startup_event():
     print("Starting Autonomous Growth Engine...")
     start_growth_engine(get_usage_metrics)
 
-    # Strategic intelligence warm start
-    memory = update_strategic_memory([])
+    # Strategic layer
+    update_strategic_memory([])
     generate_strategy_insights()
+
+    # Predictive layer
+    generate_predictions()
 
 
 app.include_router(strategy_router)
+app.include_router(prediction_router)
 
 
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Strategic Intelligence Active"
+        "status": "Jarvis LIVE — Predictive Market Awareness Active"
     }
