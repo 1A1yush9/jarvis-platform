@@ -8,10 +8,11 @@ from app.opportunity_engine import OpportunityEngine
 from app.execution_engine import ExecutionEngine
 from app.revenue_engine import RevenueOptimizationEngine
 from app.cognitive_os import CognitiveBusinessOS
+from app.growth_orchestrator import AutonomousGrowthOrchestrator
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Cognitive Business OS Active"
+SYSTEM_STATUS = "Jarvis LIVE — Autonomous Growth Orchestrator Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -25,6 +26,7 @@ opportunity_engine = OpportunityEngine()
 execution_engine = ExecutionEngine()
 revenue_engine = RevenueOptimizationEngine()
 cognitive_os = CognitiveBusinessOS()
+growth_orchestrator = AutonomousGrowthOrchestrator()
 
 
 # -----------------------------------
@@ -47,7 +49,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "7.0",
+        "stage": "7.1",
         "timestamp": time.time()
     }
 
@@ -63,30 +65,6 @@ def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
     observer_event("Opportunity created")
 
     return {"opportunity": opportunity}
-
-
-# -----------------------------------
-@app.post("/execute/from-opportunity")
-def create_execution(payload: dict, x_api_key: Optional[str] = Header(None)):
-
-    client_id = authenticate(x_api_key)
-
-    bias = {
-        s: revenue_engine.strategy_score(s)
-        for s in revenue_engine.strategy_performance
-    }
-
-    for opp in opportunity_engine.get_client_opportunities(client_id):
-        if opp["opportunity_id"] == payload["opportunity_id"]:
-            action = execution_engine.create_execution_plan(
-                client_id,
-                opp,
-                strategy_bias=bias
-            )
-            observer_event("Execution proposed")
-            return {"action": action}
-
-    raise HTTPException(status_code=404, detail="Opportunity not found")
 
 
 # -----------------------------------
@@ -114,8 +92,6 @@ def report_revenue(payload: dict, x_api_key: Optional[str] = Header(None)):
 
 
 # -----------------------------------
-# COGNITIVE CYCLE (ADMIN TRIGGER)
-# -----------------------------------
 @app.post("/admin/run-cognitive-cycle")
 def run_cycle(x_api_key: Optional[str] = Header(None)):
 
@@ -130,6 +106,26 @@ def run_cycle(x_api_key: Optional[str] = Header(None)):
     )
 
     observer_event("Cognitive cycle executed")
+    return result
+
+
+# -----------------------------------
+# AUTONOMOUS GROWTH TRIGGER
+# -----------------------------------
+@app.post("/admin/run-growth-cycle")
+def run_growth(x_api_key: Optional[str] = Header(None)):
+
+    role = authenticate(x_api_key)
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    result = growth_orchestrator.run_growth_cycle(
+        cognitive_os.system_focus,
+        opportunity_engine,
+        execution_engine
+    )
+
+    observer_event("Autonomous growth cycle executed")
 
     return result
 
@@ -147,6 +143,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         "execution": execution_engine.system_snapshot(),
         "revenue": revenue_engine.system_snapshot(),
         "cognitive_os": cognitive_os.snapshot(),
+        "growth_orchestrator": growth_orchestrator.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
