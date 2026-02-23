@@ -39,11 +39,16 @@ try:
 except Exception:
     ExecutiveDecisionCore = None
 
+try:
+    from app.core.strategy_rewrite import StrategyRewriteEngine
+except Exception:
+    StrategyRewriteEngine = None
+
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="10.0",
-    description="Jarvis LIVE — Executive Decision Core Active"
+    version="10.1",
+    description="Jarvis LIVE — Strategy Rewrite Engine Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
@@ -55,6 +60,7 @@ deal_intelligence = None
 proposal_engine = None
 revenue_operations = None
 executive_core = None
+strategy_rewrite = None
 
 
 # ---------------------------------------------------
@@ -92,6 +98,12 @@ if ExecutiveDecisionCore:
         revenue_command
     )
 
+if StrategyRewriteEngine:
+    strategy_rewrite = StrategyRewriteEngine(
+        executive_core,
+        enterprise_controller
+    )
+
 
 # ---------------------------------------------------
 # ROOT
@@ -100,8 +112,8 @@ if ExecutiveDecisionCore:
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Executive Decision Core Active",
-        "stage": "10.0",
+        "status": "Jarvis LIVE — Strategy Rewrite Engine Active",
+        "stage": "10.1",
         "startup_time": startup_time
     }
 
@@ -129,8 +141,8 @@ def executive_status():
     return {"executive_core": "inactive"}
 
 
-@app.get("/revenue-ops/status")
-def revenue_ops_status():
-    if revenue_operations:
-        return revenue_operations.get_status()
-    return {"revenue_operations": "inactive"}
+@app.get("/strategy/status")
+def strategy_status():
+    if strategy_rewrite:
+        return strategy_rewrite.get_status()
+    return {"strategy_rewrite": "inactive"}
