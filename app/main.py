@@ -7,10 +7,11 @@ import time
 from app.opportunity_engine import OpportunityEngine
 from app.execution_engine import ExecutionEngine
 from app.revenue_engine import RevenueOptimizationEngine
+from app.cognitive_os import CognitiveBusinessOS
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Revenue Optimization Intelligence Active"
+SYSTEM_STATUS = "Jarvis LIVE — Cognitive Business OS Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -23,6 +24,7 @@ observer_log = []
 opportunity_engine = OpportunityEngine()
 execution_engine = ExecutionEngine()
 revenue_engine = RevenueOptimizationEngine()
+cognitive_os = CognitiveBusinessOS()
 
 
 # -----------------------------------
@@ -45,7 +47,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "6.5",
+        "stage": "7.0",
         "timestamp": time.time()
     }
 
@@ -68,7 +70,6 @@ def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
 def create_execution(payload: dict, x_api_key: Optional[str] = Header(None)):
 
     client_id = authenticate(x_api_key)
-    meter_usage(client_id)
 
     bias = {
         s: revenue_engine.strategy_score(s)
@@ -82,7 +83,7 @@ def create_execution(payload: dict, x_api_key: Optional[str] = Header(None)):
                 opp,
                 strategy_bias=bias
             )
-            observer_event("Execution plan proposed")
+            observer_event("Execution proposed")
             return {"action": action}
 
     raise HTTPException(status_code=404, detail="Opportunity not found")
@@ -108,9 +109,29 @@ def report_revenue(payload: dict, x_api_key: Optional[str] = Header(None)):
         payload["revenue"]
     )
 
-    observer_event("Revenue outcome recorded")
-
+    observer_event("Revenue recorded")
     return {"revenue_record": record}
+
+
+# -----------------------------------
+# COGNITIVE CYCLE (ADMIN TRIGGER)
+# -----------------------------------
+@app.post("/admin/run-cognitive-cycle")
+def run_cycle(x_api_key: Optional[str] = Header(None)):
+
+    role = authenticate(x_api_key)
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    result = cognitive_os.run_cycle(
+        opportunity_engine.system_snapshot(),
+        execution_engine.system_snapshot(),
+        revenue_engine.system_snapshot()
+    )
+
+    observer_event("Cognitive cycle executed")
+
+    return result
 
 
 # -----------------------------------
@@ -118,7 +139,6 @@ def report_revenue(payload: dict, x_api_key: Optional[str] = Header(None)):
 def admin_snapshot(x_api_key: Optional[str] = Header(None)):
 
     role = authenticate(x_api_key)
-
     if role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
 
@@ -126,6 +146,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         "opportunities": opportunity_engine.system_snapshot(),
         "execution": execution_engine.system_snapshot(),
         "revenue": revenue_engine.system_snapshot(),
+        "cognitive_os": cognitive_os.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
