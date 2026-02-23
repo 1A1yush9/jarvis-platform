@@ -19,11 +19,16 @@ try:
 except Exception:
     ClientAcquisitionEngine = None
 
+try:
+    from app.core.deal_intelligence import DealIntelligenceEngine
+except Exception:
+    DealIntelligenceEngine = None
+
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="9.2",
-    description="Jarvis LIVE — Client Acquisition Active"
+    version="9.3",
+    description="Jarvis LIVE — Deal Intelligence Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
@@ -31,6 +36,7 @@ startup_time = datetime.utcnow().isoformat()
 enterprise_controller = None
 revenue_command = None
 client_acquisition = None
+deal_intelligence = None
 
 
 # ---------------------------------------------------
@@ -52,6 +58,13 @@ if ClientAcquisitionEngine:
     )
     print("Stage 9.2 Client Acquisition ACTIVE")
 
+if DealIntelligenceEngine:
+    deal_intelligence = DealIntelligenceEngine(
+        client_acquisition,
+        revenue_command
+    )
+    print("Stage 9.3 Deal Intelligence ACTIVE")
+
 
 # ---------------------------------------------------
 # ROOT
@@ -60,8 +73,8 @@ if ClientAcquisitionEngine:
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Client Acquisition Active",
-        "stage": "9.2",
+        "status": "Jarvis LIVE — Deal Intelligence Active",
+        "stage": "9.3",
         "startup_time": startup_time
     }
 
@@ -79,7 +92,7 @@ def health():
 
 
 # ---------------------------------------------------
-# ENTERPRISE STATUS
+# STATUS ENDPOINTS
 # ---------------------------------------------------
 
 @app.get("/enterprise/status")
@@ -89,10 +102,6 @@ def enterprise_status():
     return {"controller": "inactive"}
 
 
-# ---------------------------------------------------
-# REVENUE STATUS
-# ---------------------------------------------------
-
 @app.get("/revenue/status")
 def revenue_status():
     if revenue_command:
@@ -100,15 +109,18 @@ def revenue_status():
     return {"revenue_command": "inactive"}
 
 
-# ---------------------------------------------------
-# CLIENT ACQUISITION STATUS
-# ---------------------------------------------------
-
 @app.get("/acquisition/status")
 def acquisition_status():
     if client_acquisition:
         return client_acquisition.get_status()
     return {"acquisition": "inactive"}
+
+
+@app.get("/deal/status")
+def deal_status():
+    if deal_intelligence:
+        return deal_intelligence.get_status()
+    return {"deal_intelligence": "inactive"}
 
 
 # ---------------------------------------------------
