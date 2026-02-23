@@ -3,106 +3,66 @@
 from fastapi import FastAPI
 from datetime import datetime
 
-# Core systems
-try:
-    from app.core.enterprise_controller import AutonomousEnterpriseController
-except Exception:
-    AutonomousEnterpriseController = None
-
-try:
-    from app.core.revenue_command import RevenueCommandSystem
-except Exception:
-    RevenueCommandSystem = None
-
-try:
-    from app.core.client_acquisition import ClientAcquisitionEngine
-except Exception:
-    ClientAcquisitionEngine = None
-
-try:
-    from app.core.deal_intelligence import DealIntelligenceEngine
-except Exception:
-    DealIntelligenceEngine = None
-
-try:
-    from app.core.proposal_engine import ProposalGenerationEngine
-except Exception:
-    ProposalGenerationEngine = None
-
-try:
-    from app.core.revenue_operations import RevenueOperationsBrain
-except Exception:
-    RevenueOperationsBrain = None
-
-try:
-    from app.core.executive_core import ExecutiveDecisionCore
-except Exception:
-    ExecutiveDecisionCore = None
-
-try:
-    from app.core.strategy_rewrite import StrategyRewriteEngine
-except Exception:
-    StrategyRewriteEngine = None
+# Core Systems
+from app.core.enterprise_controller import AutonomousEnterpriseController
+from app.core.revenue_command import RevenueCommandSystem
+from app.core.client_acquisition import ClientAcquisitionEngine
+from app.core.deal_intelligence import DealIntelligenceEngine
+from app.core.proposal_engine import ProposalGenerationEngine
+from app.core.revenue_operations import RevenueOperationsBrain
+from app.core.executive_core import ExecutiveDecisionCore
+from app.core.strategy_rewrite import StrategyRewriteEngine
+from app.core.meta_learning import MetaLearningEngine
 
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="10.1",
-    description="Jarvis LIVE — Strategy Rewrite Engine Active"
+    version="10.2",
+    description="Jarvis LIVE — Meta Learning Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
 
-enterprise_controller = None
-revenue_command = None
-client_acquisition = None
-deal_intelligence = None
-proposal_engine = None
-revenue_operations = None
-executive_core = None
-strategy_rewrite = None
-
-
 # ---------------------------------------------------
-# SYSTEM INITIALIZATION
+# SYSTEM INITIALIZATION (ORDER MATTERS)
 # ---------------------------------------------------
 
-if AutonomousEnterpriseController:
-    enterprise_controller = AutonomousEnterpriseController()
+enterprise_controller = AutonomousEnterpriseController()
 
-if RevenueCommandSystem:
-    revenue_command = RevenueCommandSystem(enterprise_controller)
+revenue_command = RevenueCommandSystem(enterprise_controller)
 
-if ClientAcquisitionEngine:
-    client_acquisition = ClientAcquisitionEngine(
-        enterprise_controller,
-        revenue_command
-    )
+client_acquisition = ClientAcquisitionEngine(
+    enterprise_controller,
+    revenue_command
+)
 
-if DealIntelligenceEngine:
-    deal_intelligence = DealIntelligenceEngine(
-        client_acquisition,
-        revenue_command
-    )
+deal_intelligence = DealIntelligenceEngine(
+    client_acquisition,
+    revenue_command
+)
 
-if ProposalGenerationEngine:
-    proposal_engine = ProposalGenerationEngine(deal_intelligence)
+proposal_engine = ProposalGenerationEngine(deal_intelligence)
 
-if RevenueOperationsBrain:
-    revenue_operations = RevenueOperationsBrain(proposal_engine)
+revenue_operations = RevenueOperationsBrain(proposal_engine)
 
-if ExecutiveDecisionCore:
-    executive_core = ExecutiveDecisionCore(
-        enterprise_controller,
-        revenue_operations,
-        revenue_command
-    )
+executive_core = ExecutiveDecisionCore(
+    enterprise_controller,
+    revenue_operations,
+    revenue_command
+)
 
-if StrategyRewriteEngine:
-    strategy_rewrite = StrategyRewriteEngine(
-        executive_core,
-        enterprise_controller
-    )
+strategy_rewrite = StrategyRewriteEngine(
+    executive_core,
+    enterprise_controller
+)
+
+meta_learning = MetaLearningEngine(
+    revenue_operations,
+    strategy_rewrite,
+    enterprise_controller
+)
+
+print("Stage 10.2 Meta Learning ACTIVE")
 
 
 # ---------------------------------------------------
@@ -112,8 +72,8 @@ if StrategyRewriteEngine:
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Strategy Rewrite Engine Active",
-        "stage": "10.1",
+        "status": "Jarvis LIVE — Meta Learning Active",
+        "stage": "10.2",
         "startup_time": startup_time
     }
 
@@ -136,13 +96,19 @@ def health():
 
 @app.get("/executive/status")
 def executive_status():
-    if executive_core:
-        return executive_core.get_status()
-    return {"executive_core": "inactive"}
+    return executive_core.get_status()
 
 
 @app.get("/strategy/status")
 def strategy_status():
-    if strategy_rewrite:
-        return strategy_rewrite.get_status()
-    return {"strategy_rewrite": "inactive"}
+    return strategy_rewrite.get_status()
+
+
+@app.get("/revenue-ops/status")
+def revenue_ops_status():
+    return revenue_operations.get_status()
+
+
+@app.get("/meta/status")
+def meta_status():
+    return meta_learning.get_status()
