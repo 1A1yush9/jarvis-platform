@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from datetime import datetime
 
-# Controllers
+# Core systems
 try:
     from app.core.enterprise_controller import AutonomousEnterpriseController
 except Exception:
@@ -34,11 +34,16 @@ try:
 except Exception:
     RevenueOperationsBrain = None
 
+try:
+    from app.core.executive_core import ExecutiveDecisionCore
+except Exception:
+    ExecutiveDecisionCore = None
+
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="9.5",
-    description="Jarvis LIVE — Revenue Operations Brain Active"
+    version="10.0",
+    description="Jarvis LIVE — Executive Decision Core Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
@@ -49,6 +54,7 @@ client_acquisition = None
 deal_intelligence = None
 proposal_engine = None
 revenue_operations = None
+executive_core = None
 
 
 # ---------------------------------------------------
@@ -57,33 +63,34 @@ revenue_operations = None
 
 if AutonomousEnterpriseController:
     enterprise_controller = AutonomousEnterpriseController()
-    print("Stage 9.0 Controller ACTIVE")
 
 if RevenueCommandSystem:
     revenue_command = RevenueCommandSystem(enterprise_controller)
-    print("Stage 9.1 Revenue Command ACTIVE")
 
 if ClientAcquisitionEngine:
     client_acquisition = ClientAcquisitionEngine(
         enterprise_controller,
         revenue_command
     )
-    print("Stage 9.2 Client Acquisition ACTIVE")
 
 if DealIntelligenceEngine:
     deal_intelligence = DealIntelligenceEngine(
         client_acquisition,
         revenue_command
     )
-    print("Stage 9.3 Deal Intelligence ACTIVE")
 
 if ProposalGenerationEngine:
     proposal_engine = ProposalGenerationEngine(deal_intelligence)
-    print("Stage 9.4 Proposal Engine ACTIVE")
 
 if RevenueOperationsBrain:
     revenue_operations = RevenueOperationsBrain(proposal_engine)
-    print("Stage 9.5 Revenue Operations Brain ACTIVE")
+
+if ExecutiveDecisionCore:
+    executive_core = ExecutiveDecisionCore(
+        enterprise_controller,
+        revenue_operations,
+        revenue_command
+    )
 
 
 # ---------------------------------------------------
@@ -93,8 +100,8 @@ if RevenueOperationsBrain:
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Revenue Operations Brain Active",
-        "stage": "9.5",
+        "status": "Jarvis LIVE — Executive Decision Core Active",
+        "stage": "10.0",
         "startup_time": startup_time
     }
 
@@ -115,39 +122,11 @@ def health():
 # STATUS ENDPOINTS
 # ---------------------------------------------------
 
-@app.get("/enterprise/status")
-def enterprise_status():
-    if enterprise_controller:
-        return enterprise_controller.get_status()
-    return {"controller": "inactive"}
-
-
-@app.get("/revenue/status")
-def revenue_status():
-    if revenue_command:
-        return revenue_command.get_status()
-    return {"revenue_command": "inactive"}
-
-
-@app.get("/acquisition/status")
-def acquisition_status():
-    if client_acquisition:
-        return client_acquisition.get_status()
-    return {"acquisition": "inactive"}
-
-
-@app.get("/deal/status")
-def deal_status():
-    if deal_intelligence:
-        return deal_intelligence.get_status()
-    return {"deal_intelligence": "inactive"}
-
-
-@app.get("/proposal/status")
-def proposal_status():
-    if proposal_engine:
-        return proposal_engine.get_status()
-    return {"proposal_engine": "inactive"}
+@app.get("/executive/status")
+def executive_status():
+    if executive_core:
+        return executive_core.get_status()
+    return {"executive_core": "inactive"}
 
 
 @app.get("/revenue-ops/status")
@@ -155,16 +134,3 @@ def revenue_ops_status():
     if revenue_operations:
         return revenue_operations.get_status()
     return {"revenue_operations": "inactive"}
-
-
-# ---------------------------------------------------
-# RISK CONTROL
-# ---------------------------------------------------
-
-@app.post("/enterprise/risk/{level}")
-def update_risk(level: str):
-    if enterprise_controller:
-        enterprise_controller.update_risk_level(level)
-        return {"message": f"Risk level set to {level}"}
-
-    return {"error": "Controller unavailable"}
