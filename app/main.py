@@ -13,18 +13,19 @@ from app.core.revenue_operations import RevenueOperationsBrain
 from app.core.executive_core import ExecutiveDecisionCore
 from app.core.strategy_rewrite import StrategyRewriteEngine
 from app.core.meta_learning import MetaLearningEngine
+from app.core.execution_interface import ExecutionInterface
 
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="10.2",
-    description="Jarvis LIVE — Meta Learning Active"
+    version="11.0",
+    description="Jarvis LIVE — Execution Interface Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
 
 # ---------------------------------------------------
-# SYSTEM INITIALIZATION (ORDER MATTERS)
+# SYSTEM INITIALIZATION
 # ---------------------------------------------------
 
 enterprise_controller = AutonomousEnterpriseController()
@@ -62,7 +63,9 @@ meta_learning = MetaLearningEngine(
     enterprise_controller
 )
 
-print("Stage 10.2 Meta Learning ACTIVE")
+execution_interface = ExecutionInterface(proposal_engine)
+
+print("Stage 11.0 Execution Interface ACTIVE")
 
 
 # ---------------------------------------------------
@@ -72,15 +75,11 @@ print("Stage 10.2 Meta Learning ACTIVE")
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Meta Learning Active",
-        "stage": "10.2",
+        "status": "Jarvis LIVE — Execution Interface Active",
+        "stage": "11.0",
         "startup_time": startup_time
     }
 
-
-# ---------------------------------------------------
-# HEALTH
-# ---------------------------------------------------
 
 @app.get("/health")
 def health():
@@ -94,21 +93,16 @@ def health():
 # STATUS ENDPOINTS
 # ---------------------------------------------------
 
-@app.get("/executive/status")
-def executive_status():
-    return executive_core.get_status()
-
-
-@app.get("/strategy/status")
-def strategy_status():
-    return strategy_rewrite.get_status()
-
-
-@app.get("/revenue-ops/status")
-def revenue_ops_status():
-    return revenue_operations.get_status()
+@app.get("/execution/status")
+def execution_status():
+    return execution_interface.get_status()
 
 
 @app.get("/meta/status")
 def meta_status():
     return meta_learning.get_status()
+
+
+@app.get("/executive/status")
+def executive_status():
+    return executive_core.get_status()
