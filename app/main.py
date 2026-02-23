@@ -29,11 +29,16 @@ try:
 except Exception:
     ProposalGenerationEngine = None
 
+try:
+    from app.core.revenue_operations import RevenueOperationsBrain
+except Exception:
+    RevenueOperationsBrain = None
+
 
 app = FastAPI(
     title="Jarvis Cognitive Business OS",
-    version="9.4",
-    description="Jarvis LIVE — Proposal Engine Active"
+    version="9.5",
+    description="Jarvis LIVE — Revenue Operations Brain Active"
 )
 
 startup_time = datetime.utcnow().isoformat()
@@ -43,6 +48,7 @@ revenue_command = None
 client_acquisition = None
 deal_intelligence = None
 proposal_engine = None
+revenue_operations = None
 
 
 # ---------------------------------------------------
@@ -75,6 +81,10 @@ if ProposalGenerationEngine:
     proposal_engine = ProposalGenerationEngine(deal_intelligence)
     print("Stage 9.4 Proposal Engine ACTIVE")
 
+if RevenueOperationsBrain:
+    revenue_operations = RevenueOperationsBrain(proposal_engine)
+    print("Stage 9.5 Revenue Operations Brain ACTIVE")
+
 
 # ---------------------------------------------------
 # ROOT
@@ -83,8 +93,8 @@ if ProposalGenerationEngine:
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Proposal Engine Active",
-        "stage": "9.4",
+        "status": "Jarvis LIVE — Revenue Operations Brain Active",
+        "stage": "9.5",
         "startup_time": startup_time
     }
 
@@ -138,6 +148,13 @@ def proposal_status():
     if proposal_engine:
         return proposal_engine.get_status()
     return {"proposal_engine": "inactive"}
+
+
+@app.get("/revenue-ops/status")
+def revenue_ops_status():
+    if revenue_operations:
+        return revenue_operations.get_status()
+    return {"revenue_operations": "inactive"}
 
 
 # ---------------------------------------------------
