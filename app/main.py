@@ -13,10 +13,11 @@ from app.self_improvement_engine import SelfImprovementEngine
 from app.market_expansion_engine import MarketExpansionEngine
 from app.mesh_engine import IntelligenceMeshEngine
 from app.consensus_engine import DistributedConsensusEngine
+from app.strategy_planner import AutonomousStrategyPlanner
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Distributed Learning Consensus Active"
+SYSTEM_STATUS = "Jarvis LIVE — Autonomous Strategic Planning Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -35,6 +36,7 @@ self_improvement = SelfImprovementEngine()
 market_expansion = MarketExpansionEngine()
 mesh_engine = IntelligenceMeshEngine()
 consensus_engine = DistributedConsensusEngine()
+strategy_planner = AutonomousStrategyPlanner()
 
 
 # -----------------------------------
@@ -57,26 +59,11 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "8.1",
+        "stage": "8.2",
         "timestamp": time.time()
     }
 
 
-# -----------------------------------
-@app.post("/predictive/signal")
-def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
-
-    client_id = authenticate(x_api_key)
-    meter_usage(client_id)
-
-    opportunity = opportunity_engine.generate_opportunity(client_id, signal)
-    observer_event("Opportunity created")
-
-    return {"opportunity": opportunity}
-
-
-# -----------------------------------
-# RECEIVE MESH SIGNAL + LEARN
 # -----------------------------------
 @app.post("/mesh/receive")
 def receive_mesh(signal: dict):
@@ -85,8 +72,26 @@ def receive_mesh(signal: dict):
     consensus_engine.ingest_mesh_signal(signal)
 
     observer_event("Mesh consensus updated")
-
     return {"status": "signal integrated"}
+
+
+# -----------------------------------
+# STRATEGIC PLAN GENERATION
+# -----------------------------------
+@app.post("/admin/generate-strategy-plan")
+def generate_plan(x_api_key: Optional[str] = Header(None)):
+
+    role = authenticate(x_api_key)
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    plan = strategy_planner.generate_plan(
+        cognitive_os.system_focus
+    )
+
+    observer_event("Strategic plan generated")
+
+    return plan
 
 
 # -----------------------------------
@@ -127,10 +132,9 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
 
     return {
         "cognitive_os": cognitive_os.snapshot(),
-        "self_improvement": self_improvement.snapshot(),
-        "market_expansion": market_expansion.snapshot(),
-        "mesh": mesh_engine.snapshot(),
+        "strategy_planner": strategy_planner.snapshot(),
         "consensus": consensus_engine.snapshot(),
+        "mesh": mesh_engine.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
