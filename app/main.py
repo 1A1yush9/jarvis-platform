@@ -10,10 +10,11 @@ from app.revenue_engine import RevenueOptimizationEngine
 from app.cognitive_os import CognitiveBusinessOS
 from app.growth_orchestrator import AutonomousGrowthOrchestrator
 from app.self_improvement_engine import SelfImprovementEngine
+from app.market_expansion_engine import MarketExpansionEngine
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Continuous Self-Improvement Active"
+SYSTEM_STATUS = "Jarvis LIVE — Autonomous Market Expansion Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -29,6 +30,7 @@ revenue_engine = RevenueOptimizationEngine()
 cognitive_os = CognitiveBusinessOS()
 growth_orchestrator = AutonomousGrowthOrchestrator()
 self_improvement = SelfImprovementEngine()
+market_expansion = MarketExpansionEngine()
 
 
 # -----------------------------------
@@ -51,7 +53,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "7.2",
+        "stage": "7.3",
         "timestamp": time.time()
     }
 
@@ -138,6 +140,24 @@ def run_growth(x_api_key: Optional[str] = Header(None)):
 
 
 # -----------------------------------
+# MARKET EXPANSION ANALYSIS
+# -----------------------------------
+@app.post("/admin/run-expansion-analysis")
+def run_expansion(x_api_key: Optional[str] = Header(None)):
+
+    role = authenticate(x_api_key)
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    result = market_expansion.analyze_opportunities(
+        opportunity_engine.system_snapshot()
+    )
+
+    observer_event("Market expansion analysis executed")
+    return result
+
+
+# -----------------------------------
 @app.get("/admin/system")
 def admin_snapshot(x_api_key: Optional[str] = Header(None)):
 
@@ -152,6 +172,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         "cognitive_os": cognitive_os.snapshot(),
         "growth_orchestrator": growth_orchestrator.snapshot(),
         "self_improvement": self_improvement.snapshot(),
+        "market_expansion": market_expansion.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
