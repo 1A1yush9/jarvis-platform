@@ -1,72 +1,132 @@
-from fastapi import FastAPI
+# app/main.py
 
-# Growth Engine
-from app.growth.growth_scheduler import start_growth_engine
+from fastapi import FastAPI, Header, HTTPException
+from typing import Optional
+import time
 
-# Strategy Layer
-from app.strategy.strategy_router import router as strategy_router
-from app.strategy.strategy_engine import (
-    update_strategic_memory,
-    generate_strategy_insights,
-)
-
-# Prediction Layer
-from app.prediction.prediction_router import router as prediction_router
-from app.prediction.prediction_engine import generate_predictions
-
+from app.opportunity_engine import OpportunityEngine
 
 app = FastAPI(title="Jarvis Platform")
 
+# -----------------------------------
+# SYSTEM STATE
+# -----------------------------------
 
-# --------------------------------------------------
-# MOCK USAGE SOURCE
-# (Later connect to real metering database)
-# --------------------------------------------------
-def get_usage_metrics():
-    return [
-        {
-            "client_id": "client_a",
-            "requests": 1500,
-            "revenue": 700,
-        },
-        {
-            "client_id": "client_b",
-            "requests": 200,
-            "revenue": 50,
-        },
-    ]
+SYSTEM_STATUS = "Jarvis LIVE — Opportunity Discovery Engine Active"
+
+API_KEYS = {
+    "admin-key": "admin",
+    "client-demo-key": "client_001"
+}
+
+usage_meter = {}
+observer_log = []
+
+opportunity_engine = OpportunityEngine()
 
 
-# --------------------------------------------------
-# STARTUP EVENT
-# --------------------------------------------------
-@app.on_event("startup")
-async def startup_event():
-    print("Starting Autonomous Growth Engine...")
+# -----------------------------------
+# AUTH LAYER
+# -----------------------------------
 
-    # Stage 6.0 — Growth Engine
-    start_growth_engine(get_usage_metrics)
-
-    # Stage 6.1 — Strategic Intelligence
-    update_strategic_memory([])
-    generate_strategy_insights()
-
-    # Stage 6.2 — Predictive Intelligence
-    generate_predictions()
+def authenticate(api_key: Optional[str]):
+    if not api_key or api_key not in API_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return API_KEYS[api_key]
 
 
-# --------------------------------------------------
-# ADMIN ROUTERS
-# --------------------------------------------------
-app.include_router(strategy_router)
-app.include_router(prediction_router)
+# -----------------------------------
+# ROOT
+# -----------------------------------
 
-
-# --------------------------------------------------
-# ROOT HEALTH ENDPOINT
-# --------------------------------------------------
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Predictive Market Awareness Active"
+        "status": SYSTEM_STATUS,
+        "stage": "6.3",
+        "timestamp": time.time()
+    }
+
+
+# -----------------------------------
+# OBSERVER SYSTEM
+# -----------------------------------
+
+def observer_event(event: str):
+    observer_log.append({
+        "event": event,
+        "time": time.time()
+    })
+
+
+# -----------------------------------
+# USAGE METERING
+# -----------------------------------
+
+def meter_usage(client_id: str):
+    usage_meter[client_id] = usage_meter.get(client_id, 0) + 1
+
+
+# -----------------------------------
+# PREDICTIVE SIGNAL INPUT
+# -----------------------------------
+
+@app.post("/predictive/signal")
+def receive_predictive_signal(
+    signal: dict,
+    x_api_key: Optional[str] = Header(None)
+):
+
+    client_id = authenticate(x_api_key)
+    meter_usage(client_id)
+
+    observer_event("Predictive signal received")
+
+    opportunity = opportunity_engine.generate_opportunity(
+        client_id,
+        signal
+    )
+
+    return {
+        "message": "Opportunity generated",
+        "opportunity": opportunity
+    }
+
+
+# -----------------------------------
+# CLIENT OPPORTUNITY FEED
+# -----------------------------------
+
+@app.get("/opportunities")
+def get_opportunities(
+    x_api_key: Optional[str] = Header(None)
+):
+
+    client_id = authenticate(x_api_key)
+    meter_usage(client_id)
+
+    return {
+        "client_id": client_id,
+        "opportunities": opportunity_engine.get_client_opportunities(client_id)
+    }
+
+
+# -----------------------------------
+# ADMIN CONTROL VIEW
+# -----------------------------------
+
+@app.get("/admin/opportunity-system")
+def admin_snapshot(
+    x_api_key: Optional[str] = Header(None)
+):
+
+    role = authenticate(x_api_key)
+
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    return {
+        "system": opportunity_engine.system_snapshot(),
+        "observer_events": len(observer_log),
+        "usage_clients": len(usage_meter)
     }
