@@ -12,10 +12,11 @@ from app.growth_orchestrator import AutonomousGrowthOrchestrator
 from app.self_improvement_engine import SelfImprovementEngine
 from app.market_expansion_engine import MarketExpansionEngine
 from app.mesh_engine import IntelligenceMeshEngine
+from app.consensus_engine import DistributedConsensusEngine
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Global Intelligence Mesh Active"
+SYSTEM_STATUS = "Jarvis LIVE — Distributed Learning Consensus Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -33,6 +34,7 @@ growth_orchestrator = AutonomousGrowthOrchestrator()
 self_improvement = SelfImprovementEngine()
 market_expansion = MarketExpansionEngine()
 mesh_engine = IntelligenceMeshEngine()
+consensus_engine = DistributedConsensusEngine()
 
 
 # -----------------------------------
@@ -55,7 +57,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "8.0",
+        "stage": "8.1",
         "timestamp": time.time()
     }
 
@@ -74,34 +76,44 @@ def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
 
 
 # -----------------------------------
-# MESH SIGNAL PUBLISH
+# RECEIVE MESH SIGNAL + LEARN
 # -----------------------------------
-@app.post("/admin/publish-mesh-signal")
-def publish_mesh(x_api_key: Optional[str] = Header(None)):
+@app.post("/mesh/receive")
+def receive_mesh(signal: dict):
+
+    mesh_engine.receive_signal(signal)
+    consensus_engine.ingest_mesh_signal(signal)
+
+    observer_event("Mesh consensus updated")
+
+    return {"status": "signal integrated"}
+
+
+# -----------------------------------
+@app.post("/admin/run-cognitive-cycle")
+def run_cycle(x_api_key: Optional[str] = Header(None)):
 
     role = authenticate(x_api_key)
     if role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
 
-    signal = mesh_engine.publish_signal(
+    local_bias = self_improvement.bias_map()
+    global_bias = consensus_engine.consensus_bias()
+
+    result = cognitive_os.run_cycle(
         opportunity_engine.system_snapshot(),
+        execution_engine.system_snapshot(),
         revenue_engine.system_snapshot(),
-        market_expansion.snapshot()
+        local_bias,
+        global_bias
     )
 
-    observer_event("Mesh signal published")
-    return signal
+    self_improvement.record_cycle_result(
+        result["focus"],
+        revenue_engine.system_snapshot()
+    )
 
-
-# -----------------------------------
-# MESH SIGNAL RECEIVE
-# -----------------------------------
-@app.post("/mesh/receive")
-def receive_mesh(signal: dict):
-
-    result = mesh_engine.receive_signal(signal)
-    observer_event("Mesh signal received")
-
+    observer_event("Consensus cognitive cycle executed")
     return result
 
 
@@ -114,14 +126,11 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         raise HTTPException(status_code=403, detail="Admin only")
 
     return {
-        "opportunities": opportunity_engine.system_snapshot(),
-        "execution": execution_engine.system_snapshot(),
-        "revenue": revenue_engine.system_snapshot(),
         "cognitive_os": cognitive_os.snapshot(),
-        "growth_orchestrator": growth_orchestrator.snapshot(),
         "self_improvement": self_improvement.snapshot(),
         "market_expansion": market_expansion.snapshot(),
         "mesh": mesh_engine.snapshot(),
+        "consensus": consensus_engine.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
