@@ -1,14 +1,9 @@
 # app/cognitive_os.py
 
 import time
-from typing import Dict
 
 
 class CognitiveBusinessOS:
-    """
-    Stage-7.0 Cognitive Business Operating System
-    Central decision coordinator for Jarvis.
-    """
 
     def __init__(self):
         self.system_focus = "initializing"
@@ -16,48 +11,52 @@ class CognitiveBusinessOS:
         self.history = []
 
     # -----------------------------------
-    # Cognitive Evaluation Cycle
-    # -----------------------------------
-    def run_cycle(self, opportunity_snapshot: dict,
-                  execution_snapshot: dict,
-                  revenue_snapshot: dict):
+    def run_cycle(
+        self,
+        opportunity_snapshot,
+        execution_snapshot,
+        revenue_snapshot,
+        bias_map=None
+    ):
 
         focus = self._decide_focus(
             opportunity_snapshot,
             execution_snapshot,
-            revenue_snapshot
+            revenue_snapshot,
+            bias_map or {}
         )
 
         self.system_focus = focus
         self.last_cycle = time.time()
 
-        record = {
-            "focus": focus,
-            "time": self.last_cycle
-        }
-
+        record = {"focus": focus, "time": self.last_cycle}
         self.history.append(record)
+
         return record
 
     # -----------------------------------
-    # Decision Logic
-    # -----------------------------------
-    def _decide_focus(self, opp, execs, revenue):
+    def _decide_focus(self, opp, execs, revenue, bias):
 
         opportunities = opp.get("total_opportunities", 0)
         actions = execs.get("total_actions", 0)
         total_revenue = revenue.get("tracked_revenue", 0)
 
+        base_focus = "exploration_mode"
+
         if total_revenue > 0 and actions > opportunities:
-            return "optimization_mode"
+            base_focus = "optimization_mode"
+        elif opportunities > actions:
+            base_focus = "growth_mode"
+        elif actions > 10:
+            base_focus = "execution_mode"
 
-        if opportunities > actions:
-            return "growth_mode"
+        # Apply learning bias
+        if bias:
+            best_focus = max(bias, key=bias.get, default=base_focus)
+            if bias.get(best_focus, 0) > 0:
+                return best_focus
 
-        if actions > 10:
-            return "execution_mode"
-
-        return "exploration_mode"
+        return base_focus
 
     # -----------------------------------
     def snapshot(self):

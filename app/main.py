@@ -9,10 +9,11 @@ from app.execution_engine import ExecutionEngine
 from app.revenue_engine import RevenueOptimizationEngine
 from app.cognitive_os import CognitiveBusinessOS
 from app.growth_orchestrator import AutonomousGrowthOrchestrator
+from app.self_improvement_engine import SelfImprovementEngine
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Autonomous Growth Orchestrator Active"
+SYSTEM_STATUS = "Jarvis LIVE — Continuous Self-Improvement Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -27,6 +28,7 @@ execution_engine = ExecutionEngine()
 revenue_engine = RevenueOptimizationEngine()
 cognitive_os = CognitiveBusinessOS()
 growth_orchestrator = AutonomousGrowthOrchestrator()
+self_improvement = SelfImprovementEngine()
 
 
 # -----------------------------------
@@ -49,7 +51,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "7.1",
+        "stage": "7.2",
         "timestamp": time.time()
     }
 
@@ -99,18 +101,24 @@ def run_cycle(x_api_key: Optional[str] = Header(None)):
     if role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
 
+    bias = self_improvement.bias_map()
+
     result = cognitive_os.run_cycle(
         opportunity_engine.system_snapshot(),
         execution_engine.system_snapshot(),
+        revenue_engine.system_snapshot(),
+        bias
+    )
+
+    self_improvement.record_cycle_result(
+        result["focus"],
         revenue_engine.system_snapshot()
     )
 
-    observer_event("Cognitive cycle executed")
+    observer_event("Adaptive cognitive cycle executed")
     return result
 
 
-# -----------------------------------
-# AUTONOMOUS GROWTH TRIGGER
 # -----------------------------------
 @app.post("/admin/run-growth-cycle")
 def run_growth(x_api_key: Optional[str] = Header(None)):
@@ -126,7 +134,6 @@ def run_growth(x_api_key: Optional[str] = Header(None)):
     )
 
     observer_event("Autonomous growth cycle executed")
-
     return result
 
 
@@ -144,6 +151,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         "revenue": revenue_engine.system_snapshot(),
         "cognitive_os": cognitive_os.snapshot(),
         "growth_orchestrator": growth_orchestrator.snapshot(),
+        "self_improvement": self_improvement.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
