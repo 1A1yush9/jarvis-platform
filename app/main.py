@@ -6,10 +6,11 @@ import time
 
 from app.opportunity_engine import OpportunityEngine
 from app.execution_engine import ExecutionEngine
+from app.revenue_engine import RevenueOptimizationEngine
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Autonomous Execution Layer Active"
+SYSTEM_STATUS = "Jarvis LIVE — Revenue Optimization Intelligence Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -21,34 +22,15 @@ observer_log = []
 
 opportunity_engine = OpportunityEngine()
 execution_engine = ExecutionEngine()
+revenue_engine = RevenueOptimizationEngine()
 
 
 # -----------------------------------
-# AUTH
-# -----------------------------------
-
 def authenticate(api_key: Optional[str]):
     if not api_key or api_key not in API_KEYS:
         raise HTTPException(status_code=401, detail="Invalid API Key")
     return API_KEYS[api_key]
 
-
-# -----------------------------------
-# ROOT
-# -----------------------------------
-
-@app.get("/")
-def root():
-    return {
-        "status": SYSTEM_STATUS,
-        "stage": "6.4",
-        "timestamp": time.time()
-    }
-
-
-# -----------------------------------
-# INTERNAL SYSTEMS
-# -----------------------------------
 
 def observer_event(event: str):
     observer_log.append({"event": event, "time": time.time()})
@@ -59,9 +41,16 @@ def meter_usage(client_id: str):
 
 
 # -----------------------------------
-# PREDICTIVE → OPPORTUNITY
-# -----------------------------------
+@app.get("/")
+def root():
+    return {
+        "status": SYSTEM_STATUS,
+        "stage": "6.5",
+        "timestamp": time.time()
+    }
 
+
+# -----------------------------------
 @app.post("/predictive/signal")
 def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
 
@@ -75,23 +64,24 @@ def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
 
 
 # -----------------------------------
-# CREATE EXECUTION PLAN
-# -----------------------------------
-
 @app.post("/execute/from-opportunity")
-def create_execution(
-    payload: dict,
-    x_api_key: Optional[str] = Header(None)
-):
+def create_execution(payload: dict, x_api_key: Optional[str] = Header(None)):
 
     client_id = authenticate(x_api_key)
     meter_usage(client_id)
 
-    opportunities = opportunity_engine.get_client_opportunities(client_id)
+    bias = {
+        s: revenue_engine.strategy_score(s)
+        for s in revenue_engine.strategy_performance
+    }
 
-    for opp in opportunities:
+    for opp in opportunity_engine.get_client_opportunities(client_id):
         if opp["opportunity_id"] == payload["opportunity_id"]:
-            action = execution_engine.create_execution_plan(client_id, opp)
+            action = execution_engine.create_execution_plan(
+                client_id,
+                opp,
+                strategy_bias=bias
+            )
             observer_event("Execution plan proposed")
             return {"action": action}
 
@@ -99,47 +89,31 @@ def create_execution(
 
 
 # -----------------------------------
-# CLIENT ACTION FEED
-# -----------------------------------
-
-@app.get("/actions")
-def get_actions(x_api_key: Optional[str] = Header(None)):
-
-    client_id = authenticate(x_api_key)
-    meter_usage(client_id)
-
-    return {
-        "client_id": client_id,
-        "actions": execution_engine.get_client_actions(client_id)
-    }
-
-
-# -----------------------------------
-# UPDATE ACTION STATUS
-# -----------------------------------
-
-@app.post("/actions/update")
-def update_action(payload: dict, x_api_key: Optional[str] = Header(None)):
+@app.post("/actions/report-revenue")
+def report_revenue(payload: dict, x_api_key: Optional[str] = Header(None)):
 
     client_id = authenticate(x_api_key)
 
-    action = execution_engine.update_status(
+    action = execution_engine.find_action(
         client_id,
-        payload["action_id"],
-        payload["status"]
+        payload["action_id"]
     )
 
     if not action:
         raise HTTPException(status_code=404, detail="Action not found")
 
-    observer_event("Action status updated")
-    return {"updated": action}
+    record = revenue_engine.record_outcome(
+        client_id,
+        action,
+        payload["revenue"]
+    )
+
+    observer_event("Revenue outcome recorded")
+
+    return {"revenue_record": record}
 
 
 # -----------------------------------
-# ADMIN SNAPSHOT
-# -----------------------------------
-
 @app.get("/admin/system")
 def admin_snapshot(x_api_key: Optional[str] = Header(None)):
 
@@ -151,6 +125,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
     return {
         "opportunities": opportunity_engine.system_snapshot(),
         "execution": execution_engine.system_snapshot(),
+        "revenue": revenue_engine.system_snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }

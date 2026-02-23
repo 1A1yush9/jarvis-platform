@@ -6,25 +6,49 @@ from typing import Dict, List
 
 
 class ExecutionEngine:
-    """
-    Stage-6.4 Autonomous Execution Layer
-    Converts opportunities into controlled execution plans.
-    """
 
     def __init__(self):
         self.client_actions: Dict[str, List[dict]] = {}
 
     # ---------------------------------
-    # Build Execution Plan
+    # Strategy Selection (Adaptive)
     # ---------------------------------
-    def create_execution_plan(self, client_id: str, opportunity: dict):
+    def _generate_strategy(self, opportunity: dict, strategy_bias=None):
+
+        priority = opportunity.get("priority", "LOW")
+
+        strategies = {
+            "HIGH": "Immediate campaign deployment with paid + organic amplification",
+            "MEDIUM": "Launch validation experiment and content positioning",
+            "LOW": "Monitor trend and prepare lightweight content assets",
+        }
+
+        base_strategy = strategies.get(priority)
+
+        # Apply optimization bias if available
+        if strategy_bias and strategy_bias.get(base_strategy, 0) > 0:
+            return f"{base_strategy} (AI-Optimized)"
+
+        return base_strategy
+
+    # ---------------------------------
+    # Create Execution Plan
+    # ---------------------------------
+    def create_execution_plan(
+        self,
+        client_id: str,
+        opportunity: dict,
+        strategy_bias=None
+    ):
+
+        strategy = self._generate_strategy(opportunity, strategy_bias)
 
         action = {
             "action_id": str(uuid.uuid4()),
             "client_id": client_id,
             "source_opportunity": opportunity["opportunity_id"],
             "title": f"Execute: {opportunity['title']}",
-            "strategy": self._generate_strategy(opportunity),
+            "strategy": strategy,
             "status": "proposed",
             "created_at": time.time()
         }
@@ -33,27 +57,11 @@ class ExecutionEngine:
         return action
 
     # ---------------------------------
-    # Strategy Generator
-    # ---------------------------------
-    def _generate_strategy(self, opportunity: dict):
-
-        priority = opportunity.get("priority", "LOW")
-
-        if priority == "HIGH":
-            return "Immediate campaign deployment with paid + organic amplification"
-        elif priority == "MEDIUM":
-            return "Launch validation experiment and content positioning"
-        else:
-            return "Monitor trend and prepare lightweight content assets"
-
-    # ---------------------------------
-    # Status Update
+    # Update Status
     # ---------------------------------
     def update_status(self, client_id: str, action_id: str, new_status: str):
 
-        actions = self.client_actions.get(client_id, [])
-
-        for action in actions:
+        for action in self.client_actions.get(client_id, []):
             if action["action_id"] == action_id:
                 action["status"] = new_status
                 action["updated_at"] = time.time()
@@ -62,11 +70,16 @@ class ExecutionEngine:
         return None
 
     # ---------------------------------
-    # Accessors
-    # ---------------------------------
     def get_client_actions(self, client_id: str):
         return self.client_actions.get(client_id, [])
 
+    def find_action(self, client_id: str, action_id: str):
+        for action in self.client_actions.get(client_id, []):
+            if action["action_id"] == action_id:
+                return action
+        return None
+
+    # ---------------------------------
     def system_snapshot(self):
         total = sum(len(v) for v in self.client_actions.values())
         return {
