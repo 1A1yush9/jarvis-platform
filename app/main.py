@@ -11,10 +11,11 @@ from app.cognitive_os import CognitiveBusinessOS
 from app.growth_orchestrator import AutonomousGrowthOrchestrator
 from app.self_improvement_engine import SelfImprovementEngine
 from app.market_expansion_engine import MarketExpansionEngine
+from app.mesh_engine import IntelligenceMeshEngine
 
 app = FastAPI(title="Jarvis Platform")
 
-SYSTEM_STATUS = "Jarvis LIVE — Autonomous Market Expansion Active"
+SYSTEM_STATUS = "Jarvis LIVE — Global Intelligence Mesh Active"
 
 API_KEYS = {
     "admin-key": "admin",
@@ -31,6 +32,7 @@ cognitive_os = CognitiveBusinessOS()
 growth_orchestrator = AutonomousGrowthOrchestrator()
 self_improvement = SelfImprovementEngine()
 market_expansion = MarketExpansionEngine()
+mesh_engine = IntelligenceMeshEngine()
 
 
 # -----------------------------------
@@ -53,7 +55,7 @@ def meter_usage(client_id: str):
 def root():
     return {
         "status": SYSTEM_STATUS,
-        "stage": "7.3",
+        "stage": "8.0",
         "timestamp": time.time()
     }
 
@@ -72,88 +74,34 @@ def receive_signal(signal: dict, x_api_key: Optional[str] = Header(None)):
 
 
 # -----------------------------------
-@app.post("/actions/report-revenue")
-def report_revenue(payload: dict, x_api_key: Optional[str] = Header(None)):
-
-    client_id = authenticate(x_api_key)
-
-    action = execution_engine.find_action(
-        client_id,
-        payload["action_id"]
-    )
-
-    if not action:
-        raise HTTPException(status_code=404, detail="Action not found")
-
-    record = revenue_engine.record_outcome(
-        client_id,
-        action,
-        payload["revenue"]
-    )
-
-    observer_event("Revenue recorded")
-    return {"revenue_record": record}
-
-
+# MESH SIGNAL PUBLISH
 # -----------------------------------
-@app.post("/admin/run-cognitive-cycle")
-def run_cycle(x_api_key: Optional[str] = Header(None)):
+@app.post("/admin/publish-mesh-signal")
+def publish_mesh(x_api_key: Optional[str] = Header(None)):
 
     role = authenticate(x_api_key)
     if role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
 
-    bias = self_improvement.bias_map()
-
-    result = cognitive_os.run_cycle(
+    signal = mesh_engine.publish_signal(
         opportunity_engine.system_snapshot(),
-        execution_engine.system_snapshot(),
         revenue_engine.system_snapshot(),
-        bias
+        market_expansion.snapshot()
     )
 
-    self_improvement.record_cycle_result(
-        result["focus"],
-        revenue_engine.system_snapshot()
-    )
-
-    observer_event("Adaptive cognitive cycle executed")
-    return result
+    observer_event("Mesh signal published")
+    return signal
 
 
 # -----------------------------------
-@app.post("/admin/run-growth-cycle")
-def run_growth(x_api_key: Optional[str] = Header(None)):
-
-    role = authenticate(x_api_key)
-    if role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
-
-    result = growth_orchestrator.run_growth_cycle(
-        cognitive_os.system_focus,
-        opportunity_engine,
-        execution_engine
-    )
-
-    observer_event("Autonomous growth cycle executed")
-    return result
-
-
+# MESH SIGNAL RECEIVE
 # -----------------------------------
-# MARKET EXPANSION ANALYSIS
-# -----------------------------------
-@app.post("/admin/run-expansion-analysis")
-def run_expansion(x_api_key: Optional[str] = Header(None)):
+@app.post("/mesh/receive")
+def receive_mesh(signal: dict):
 
-    role = authenticate(x_api_key)
-    if role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+    result = mesh_engine.receive_signal(signal)
+    observer_event("Mesh signal received")
 
-    result = market_expansion.analyze_opportunities(
-        opportunity_engine.system_snapshot()
-    )
-
-    observer_event("Market expansion analysis executed")
     return result
 
 
@@ -173,6 +121,7 @@ def admin_snapshot(x_api_key: Optional[str] = Header(None)):
         "growth_orchestrator": growth_orchestrator.snapshot(),
         "self_improvement": self_improvement.snapshot(),
         "market_expansion": market_expansion.snapshot(),
+        "mesh": mesh_engine.snapshot(),
         "observer_events": len(observer_log),
         "clients_metered": len(usage_meter)
     }
