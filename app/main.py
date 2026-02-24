@@ -1,108 +1,54 @@
-# app/main.py
-
 from fastapi import FastAPI
 from datetime import datetime
 
-# Core Systems
-from app.core.enterprise_controller import AutonomousEnterpriseController
-from app.core.revenue_command import RevenueCommandSystem
-from app.core.client_acquisition import ClientAcquisitionEngine
-from app.core.deal_intelligence import DealIntelligenceEngine
-from app.core.proposal_engine import ProposalGenerationEngine
-from app.core.revenue_operations import RevenueOperationsBrain
-from app.core.executive_core import ExecutiveDecisionCore
-from app.core.strategy_rewrite import StrategyRewriteEngine
-from app.core.meta_learning import MetaLearningEngine
-from app.core.execution_interface import ExecutionInterface
+# Existing Jarvis systems (keep your imports here if present)
 
+# Stage-14.0
+from core.unified_kernel import unified_kernel
 
-app = FastAPI(
-    title="Jarvis Cognitive Business OS",
-    version="11.0",
-    description="Jarvis LIVE — Execution Interface Active"
-)
-
-startup_time = datetime.utcnow().isoformat()
+app = FastAPI(title="Jarvis Cognitive Core")
 
 # ---------------------------------------------------
-# SYSTEM INITIALIZATION
-# ---------------------------------------------------
-
-enterprise_controller = AutonomousEnterpriseController()
-
-revenue_command = RevenueCommandSystem(enterprise_controller)
-
-client_acquisition = ClientAcquisitionEngine(
-    enterprise_controller,
-    revenue_command
-)
-
-deal_intelligence = DealIntelligenceEngine(
-    client_acquisition,
-    revenue_command
-)
-
-proposal_engine = ProposalGenerationEngine(deal_intelligence)
-
-revenue_operations = RevenueOperationsBrain(proposal_engine)
-
-executive_core = ExecutiveDecisionCore(
-    enterprise_controller,
-    revenue_operations,
-    revenue_command
-)
-
-strategy_rewrite = StrategyRewriteEngine(
-    executive_core,
-    enterprise_controller
-)
-
-meta_learning = MetaLearningEngine(
-    revenue_operations,
-    strategy_rewrite,
-    enterprise_controller
-)
-
-execution_interface = ExecutionInterface(proposal_engine)
-
-print("Stage 11.0 Execution Interface ACTIVE")
-
-
-# ---------------------------------------------------
-# ROOT
+# ROOT HEALTH CHECK
 # ---------------------------------------------------
 
 @app.get("/")
 def root():
     return {
-        "status": "Jarvis LIVE — Execution Interface Active",
-        "stage": "11.0",
-        "startup_time": startup_time
-    }
-
-
-@app.get("/health")
-def health():
-    return {
-        "system": "operational",
+        "system": "Jarvis Platform",
+        "status": "LIVE",
+        "stage": "14.0 - Unified Intelligence Kernel",
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
 # ---------------------------------------------------
-# STATUS ENDPOINTS
+# KERNEL STATUS
 # ---------------------------------------------------
 
-@app.get("/execution/status")
-def execution_status():
-    return execution_interface.get_status()
+@app.get("/kernel/status")
+def kernel_status():
+    return unified_kernel.status()
 
 
-@app.get("/meta/status")
-def meta_status():
-    return meta_learning.get_status()
+# ---------------------------------------------------
+# KERNEL EVALUATION (SAFE TEST ENDPOINT)
+# ---------------------------------------------------
 
+@app.post("/kernel/evaluate")
+def kernel_evaluate():
+    """
+    Runs advisory evaluation.
+    Does NOT affect execution systems.
+    """
 
-@app.get("/executive/status")
-def executive_status():
-    return executive_core.get_status()
+    # Example ingestion (temporary safe defaults)
+    unified_kernel.update_state(
+        clients_active=5,
+        execution_load=0.45,
+        revenue_velocity=0.6,
+        market_opportunity_score=0.5
+    )
+
+    decision = unified_kernel.evaluate()
+    return decision
