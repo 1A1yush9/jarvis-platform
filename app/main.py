@@ -4,6 +4,7 @@ from datetime import datetime
 from core.unified_kernel import unified_kernel
 from core.signal_fusion import signal_fusion
 from core.context_reasoner import context_reasoner
+from core.predictive_engine import predictive_engine
 
 app = FastAPI(title="Jarvis Cognitive Core")
 
@@ -16,13 +17,13 @@ def root():
     return {
         "system": "Jarvis Platform",
         "status": "LIVE",
-        "stage": "14.2 - Contextual Reasoning Layer",
+        "stage": "14.3 - Predictive Reasoning Engine",
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
 # ---------------------------------------------------
-# SIGNAL STATUS
+# STATUS ENDPOINTS
 # ---------------------------------------------------
 
 @app.get("/fusion/status")
@@ -30,18 +31,15 @@ def fusion_status():
     return signal_fusion.status()
 
 
-# ---------------------------------------------------
-# CONTEXT STATUS
-# ---------------------------------------------------
-
 @app.get("/context/status")
 def context_status():
     return context_reasoner.status()
 
 
-# ---------------------------------------------------
-# KERNEL STATUS
-# ---------------------------------------------------
+@app.get("/prediction/status")
+def prediction_status():
+    return predictive_engine.status()
+
 
 @app.get("/kernel/status")
 def kernel_status():
@@ -49,19 +47,22 @@ def kernel_status():
 
 
 # ---------------------------------------------------
-# FULL COGNITIVE EVALUATION
+# FULL COGNITIVE PIPELINE
 # ---------------------------------------------------
 
 @app.post("/kernel/evaluate")
 def kernel_evaluate():
 
-    # 1️⃣ Collect fused signals
+    # 1️⃣ Signals
     signals = signal_fusion.collect_signals()
 
-    # 2️⃣ Generate contextual reasoning
+    # 2️⃣ Context reasoning
     context = context_reasoner.analyze(signals)
 
-    # 3️⃣ Feed kernel
+    # 3️⃣ Prediction
+    prediction = predictive_engine.forecast(signals, context)
+
+    # 4️⃣ Kernel evaluation
     unified_kernel.update_state(
         clients_active=signals["clients_active"],
         execution_load=signals["execution_load"],
@@ -74,5 +75,6 @@ def kernel_evaluate():
     return {
         "signals": signals,
         "context": context,
+        "prediction": prediction,
         "decision": decision
     }
