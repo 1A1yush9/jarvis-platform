@@ -6,6 +6,7 @@ from core.signal_fusion import signal_fusion
 from core.context_reasoner import context_reasoner
 from core.predictive_engine import predictive_engine
 from core.priority_intelligence import priority_intelligence
+from core.executive_layer import executive_layer
 
 app = FastAPI(title="Jarvis Cognitive Core")
 
@@ -18,7 +19,7 @@ def root():
     return {
         "system": "Jarvis Platform",
         "status": "LIVE",
-        "stage": "14.4 - Strategic Priority Intelligence",
+        "stage": "14.5 - Executive Decision Layer",
         "timestamp": datetime.utcnow().isoformat()
     }
 
@@ -47,6 +48,11 @@ def priority_status():
     return priority_intelligence.status()
 
 
+@app.get("/executive/status")
+def executive_status():
+    return executive_layer.status()
+
+
 @app.get("/kernel/status")
 def kernel_status():
     return unified_kernel.status()
@@ -68,14 +74,22 @@ def kernel_evaluate():
     # 3️⃣ Prediction
     prediction = predictive_engine.forecast(signals, context)
 
-    # 4️⃣ Strategic Priority
+    # 4️⃣ Priority
     priority = priority_intelligence.evaluate(
         signals,
         context,
         prediction
     )
 
-    # 5️⃣ Kernel Evaluation
+    # 5️⃣ Executive Framing
+    executive = executive_layer.synthesize(
+        signals,
+        context,
+        prediction,
+        priority
+    )
+
+    # 6️⃣ Kernel Evaluation
     unified_kernel.update_state(
         clients_active=signals["clients_active"],
         execution_load=signals["execution_load"],
@@ -90,5 +104,6 @@ def kernel_evaluate():
         "context": context,
         "prediction": prediction,
         "priority": priority,
+        "executive": executive,
         "decision": decision
     }
