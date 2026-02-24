@@ -3,6 +3,7 @@ from datetime import datetime
 
 from core.unified_kernel import unified_kernel
 from core.signal_fusion import signal_fusion
+from core.context_reasoner import context_reasoner
 
 app = FastAPI(title="Jarvis Cognitive Core")
 
@@ -15,18 +16,27 @@ def root():
     return {
         "system": "Jarvis Platform",
         "status": "LIVE",
-        "stage": "14.1 - Cognitive Signal Fusion",
+        "stage": "14.2 - Contextual Reasoning Layer",
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
 # ---------------------------------------------------
-# SIGNAL SNAPSHOT
+# SIGNAL STATUS
 # ---------------------------------------------------
 
 @app.get("/fusion/status")
 def fusion_status():
     return signal_fusion.status()
+
+
+# ---------------------------------------------------
+# CONTEXT STATUS
+# ---------------------------------------------------
+
+@app.get("/context/status")
+def context_status():
+    return context_reasoner.status()
 
 
 # ---------------------------------------------------
@@ -39,16 +49,19 @@ def kernel_status():
 
 
 # ---------------------------------------------------
-# FUSED EVALUATION
+# FULL COGNITIVE EVALUATION
 # ---------------------------------------------------
 
 @app.post("/kernel/evaluate")
 def kernel_evaluate():
 
-    # Collect real-time signals
+    # 1️⃣ Collect fused signals
     signals = signal_fusion.collect_signals()
 
-    # Feed kernel
+    # 2️⃣ Generate contextual reasoning
+    context = context_reasoner.analyze(signals)
+
+    # 3️⃣ Feed kernel
     unified_kernel.update_state(
         clients_active=signals["clients_active"],
         execution_load=signals["execution_load"],
@@ -60,5 +73,6 @@ def kernel_evaluate():
 
     return {
         "signals": signals,
+        "context": context,
         "decision": decision
     }
