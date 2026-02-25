@@ -28,11 +28,14 @@ from core.revenue_intelligence import RevenueIntelligence
 # APP INITIALIZATION
 # --------------------------------------------------
 
-app = FastAPI(title="Jarvis Strategic Intelligence API")
-
+app = FastAPI(
+    title="Jarvis Strategic Intelligence API",
+    version="17.3",
+    description="Unified Intelligence Kernel — Advisory Mode"
+)
 
 # --------------------------------------------------
-# REGISTER ROUTERS
+# REGISTER ROUTERS (AFTER APP CREATION)
 # --------------------------------------------------
 
 app.include_router(proposal_router, tags=["Proposal Intelligence"])
@@ -40,7 +43,7 @@ app.include_router(executive_router, tags=["Executive Decision"])
 
 
 # --------------------------------------------------
-# SYSTEM MODULES INITIALIZATION
+# SYSTEM MODULE INITIALIZATION
 # --------------------------------------------------
 
 session_manager = SessionManager()
@@ -53,7 +56,7 @@ revenue_intelligence = RevenueIntelligence()
 
 
 # --------------------------------------------------
-# HEALTH ENDPOINTS
+# ROOT ENDPOINT
 # --------------------------------------------------
 
 @app.get("/")
@@ -61,9 +64,14 @@ async def root():
     return {
         "system": "Jarvis Strategic Intelligence",
         "status": "operational",
-        "mode": "advisory_only"
+        "mode": "advisory_only",
+        "stage": "17.3"
     }
 
+
+# --------------------------------------------------
+# HEALTH CHECK
+# --------------------------------------------------
 
 @app.get("/health")
 async def health_check():
@@ -71,5 +79,6 @@ async def health_check():
         "status": "healthy",
         "kernel": "active",
         "proposal_engine": "enabled",
-        "executive_engine": "enabled"
+        "executive_engine": "enabled",
+        "execution_authority": "disabled"
     }
