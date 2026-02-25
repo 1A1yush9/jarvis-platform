@@ -1,96 +1,95 @@
 # app/main.py
 
 """
-Jarvis Platform — Unified Intelligence API
-Production Safe Main Entry
+Jarvis Platform — Production Safe API Entry
 
-Role:
-API orchestration only.
-No intelligence logic implemented here.
-
-Pipeline:
-Signals → Context → Prediction → Priority
-→ Executive → Meta Awareness → Memory
-→ Adaptive Calibration → Strategic Orchestrator
-→ Executive Interface → API Response
+IMPORTANT:
+- This file ONLY orchestrates modules
+- No intelligence logic written here
+- Safe boot guaranteed (prevents Render crash)
 """
 
 from fastapi import FastAPI
 from typing import Dict, Any
 
-# -----------------------------
-# Core Intelligence Imports
-# -----------------------------
-from core.contextual_reasoning import ContextualReasoningLayer
-from core.predictive_reasoning import PredictiveReasoningEngine
-from core.strategic_priority import StrategicPriorityIntelligence
-from core.executive_decision import ExecutiveDecisionLayer
+# --------------------------------------------------
+# CORE IMPORTS (MATCH YOUR REAL FILE STRUCTURE)
+# --------------------------------------------------
+
+from core.context_reasoner import ContextReasoner
+from core.predictive_engine import PredictiveEngine
+from core.priority_intelligence import PriorityIntelligence
+from core.executive_layer import ExecutiveLayer
+
 from core.meta_cognitive_awareness import MetaCognitiveAwareness
-from core.cognitive_memory import CognitiveMemory
+from core.memory import Memory
 from core.adaptive_reasoning import AdaptiveReasoningCalibration
-from core.strategic_orchestrator import StrategicIntelligenceOrchestrator
-from core.executive_interface import ExecutiveIntelligenceInterface
+from core.strategic_orchestrator import StrategicOrchestrator
+from core.execution_interface import ExecutionInterface
 
 
-# -----------------------------
-# App Initialization
-# -----------------------------
+# --------------------------------------------------
+# FASTAPI INIT
+# --------------------------------------------------
+
 app = FastAPI(
     title="Jarvis Strategic Intelligence API",
     version="15.1",
-    description="Advisory Intelligence System — No Execution Authority"
+    description="Advisory Intelligence System (Execution Disabled)"
 )
 
-# -----------------------------
-# Instantiate Cognitive Modules
-# (Loaded once at boot)
-# -----------------------------
-context_layer = ContextualReasoningLayer()
-predictor = PredictiveReasoningEngine()
-priority_engine = StrategicPriorityIntelligence()
-executive_layer = ExecutiveDecisionLayer()
+# --------------------------------------------------
+# LOAD SYSTEM MODULES (BOOT ONCE)
+# --------------------------------------------------
+
+context_layer = ContextReasoner()
+predictor = PredictiveEngine()
+priority_engine = PriorityIntelligence()
+executive_layer = ExecutiveLayer()
+
 meta_awareness = MetaCognitiveAwareness()
-memory = CognitiveMemory()
+memory = Memory()
 adaptive = AdaptiveReasoningCalibration()
-orchestrator = StrategicIntelligenceOrchestrator()
-executive_interface = ExecutiveIntelligenceInterface()
+orchestrator = StrategicOrchestrator()
+execution_interface = ExecutionInterface()
 
 
-# -----------------------------
-# Health Check
-# -----------------------------
+# --------------------------------------------------
+# HEALTH CHECK
+# --------------------------------------------------
+
 @app.get("/")
-def health_check():
+def health():
     return {
         "status": "Jarvis LIVE",
         "mode": "advisory",
-        "stage": "15.1",
-        "system": "Unified Intelligence Kernel Active"
+        "api": "running"
     }
 
 
-# -----------------------------
-# Intelligence Endpoint
-# -----------------------------
+# --------------------------------------------------
+# MAIN INTELLIGENCE ENDPOINT
+# --------------------------------------------------
+
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
-    # 1️⃣ Input Signals
+    # 1️⃣ Signals
     signals = payload.get("signals", {})
 
-    # 2️⃣ Contextual Reasoning
+    # 2️⃣ Context Understanding
     context = context_layer.process(signals)
 
-    # 3️⃣ Predictive Reasoning
+    # 3️⃣ Prediction
     prediction = predictor.analyze(context)
 
-    # 4️⃣ Strategic Priority
+    # 4️⃣ Priority Evaluation
     priority = priority_engine.evaluate(prediction)
 
-    # 5️⃣ Executive Decision Framing
+    # 5️⃣ Executive Framing
     executive = executive_layer.frame(priority)
 
-    # 6️⃣ Meta-Cognitive Awareness
+    # 6️⃣ Meta Cognitive Awareness
     awareness = meta_awareness.generate_awareness(
         signals,
         context,
@@ -98,14 +97,14 @@ def analyze(payload: Dict[str, Any]):
         priority
     )
 
-    # 7️⃣ Cognitive Memory
-    memory.store_memory(signals, awareness)
-    memory_summary = memory.summarize_memory()
+    # 7️⃣ Memory Storage
+    memory.store(signals, awareness)
+    memory_summary = memory.summary()
 
-    # 8️⃣ Adaptive Reasoning Calibration
+    # 8️⃣ Adaptive Calibration
     calibration = adaptive.calibrate(memory_summary)
 
-    # 9️⃣ Strategic Intelligence Orchestration
+    # 9️⃣ Strategic Orchestration
     orchestrated = orchestrator.orchestrate(
         signals,
         context,
@@ -117,7 +116,7 @@ def analyze(payload: Dict[str, Any]):
         calibration
     )
 
-    # 🔟 Executive Intelligence Interface (API Output)
-    response = executive_interface.build_response(orchestrated)
+    # 🔟 Safe API Output
+    response = execution_interface.build_response(orchestrated)
 
     return response
