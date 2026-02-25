@@ -10,6 +10,7 @@ from core.telemetry import Telemetry
 from core.control_plane import ControlPlane
 from core.access_control import AccessControl
 from core.client_isolation import ClientIsolation
+from core.revenue_intelligence import RevenueIntelligence
 
 app = FastAPI(title="Jarvis Strategic Intelligence API")
 
@@ -23,6 +24,7 @@ telemetry = Telemetry()
 control_plane = ControlPlane()
 access_control = AccessControl()
 client_isolation = ClientIsolation()
+revenue_intelligence = RevenueIntelligence()
 
 
 # --------------------------------------------------
@@ -39,14 +41,13 @@ def health():
 
 
 # --------------------------------------------------
-# CONTROL MODE (OWNER ONLY)
+# CONTROL MODE
 # --------------------------------------------------
 
 @app.post("/control/mode")
 def change_mode(payload: Dict[str, Any]):
 
-    api_key = payload.get("api_key", "")
-    role = access_control.get_role(api_key)
+    role = access_control.get_role(payload.get("api_key", ""))
 
     if not access_control.allowed(role, "control"):
         return {"error": "permission_denied"}
@@ -55,14 +56,13 @@ def change_mode(payload: Dict[str, Any]):
 
 
 # --------------------------------------------------
-# ANALYZE (CLIENT ISOLATED)
+# ANALYZE
 # --------------------------------------------------
 
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
-    api_key = payload.get("api_key", "")
-    role = access_control.get_role(api_key)
+    role = access_control.get_role(payload.get("api_key", ""))
 
     if not access_control.allowed(role, "analyze"):
         return {"error": "access_denied"}
@@ -73,32 +73,34 @@ def analyze(payload: Dict[str, Any]):
     start = telemetry.start_timer()
 
     try:
-        # CLIENT IDENTIFICATION
         client_id = payload.get("client_id", "default_client")
-
-        # SESSION
         session_id = payload.get("session_id") or str(uuid.uuid4())
-        session_info = session_manager.get_session(session_id)
 
-        # SIGNALS
+        session_manager.get_session(session_id)
+
         signals = payload.get("signals", {})
         awareness = {"status": "processed"}
 
-        # CLIENT ISOLATED MEMORY
+        # Client isolated memory
         client_isolation.store_memory(
             client_id,
             {"signals": signals, "awareness": awareness}
         )
 
-        # GLOBAL PERSISTENCE
+        # Persistent memory
         persistent_memory.store(signals, awareness)
+
+        # Revenue intelligence (NEW)
+        revenue_state = revenue_intelligence.evaluate(
+            client_id,
+            signals
+        )
 
         telemetry.end_timer(start)
 
         return {
-            "client": client_isolation.summary(client_id),
-            "role": role,
-            "session_id": session_id,
+            "client": client_id,
+            "revenue_intelligence": revenue_state,
             "telemetry": telemetry.status(),
             "notice": "Advisory intelligence only"
         }
