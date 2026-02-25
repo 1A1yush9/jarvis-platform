@@ -1,120 +1,159 @@
-# app/core/proposal_engine.py
+# core/proposal_engine.py
 
 from datetime import datetime
 from typing import Dict, Any, List
-import threading
-import time
-import random
 
 
-class ProposalGenerationEngine:
+class ProposalIntelligenceEngine:
     """
-    Stage 9.4 — Autonomous Proposal Generation Engine
+    Stage-17.2
+    Advisory-only proposal generation layer.
 
-    Converts deal intelligence outputs into structured
-    proposal blueprints ready for review.
+    Converts deal + revenue intelligence into
+    executive-ready strategic proposals.
     """
 
-    def __init__(self, deal_intelligence=None):
-        self.active = True
-        self.deal_intelligence = deal_intelligence
+    def __init__(self):
+        self.version = "17.2"
+        self.engine_name = "Proposal Intelligence Engine"
 
-        self.state = {
-            "mode": "proposal_generation",
-            "last_proposal": None,
-            "active_template": None
-        }
+    # --------------------------------------------------
+    # MAIN ENTRY
+    # --------------------------------------------------
 
-        self.proposal_pipeline: List[Dict[str, Any]] = []
-        self.history: List[Dict[str, Any]] = []
+    def generate_proposal(
+        self,
+        tenant_id: str,
+        deal_data: Dict[str, Any],
+        revenue_data: Dict[str, Any],
+        client_context: Dict[str, Any],
+    ) -> Dict[str, Any]:
 
-        self.thread = threading.Thread(
-            target=self._proposal_loop,
-            daemon=True
+        opportunity_score = deal_data.get("opportunity_score", 0.5)
+        revenue_potential = revenue_data.get("estimated_value", 0)
+
+        services = self._recommend_services(
+            opportunity_score,
+            client_context
         )
-        self.thread.start()
 
-    # ---------------------------------------------------
-    # MAIN LOOP
-    # ---------------------------------------------------
-    def _proposal_loop(self):
-        while self.active:
-            try:
-                proposal = self._generate_proposal()
+        risk_level = self._risk_analysis(deal_data)
 
-                if proposal:
-                    self.proposal_pipeline.append(proposal)
-                    self.history.append(proposal)
+        positioning = self._value_positioning(
+            revenue_potential,
+            opportunity_score
+        )
 
-                    if len(self.history) > 150:
-                        self.history.pop(0)
+        confidence = self._confidence_score(
+            opportunity_score,
+            risk_level
+        )
 
-                    self.state["last_proposal"] = proposal["timestamp"]
-
-                    print(
-                        f"[ProposalEngine] Proposal created → {proposal['offer_type']}"
-                    )
-
-                time.sleep(50)  # Render-safe pacing
-
-            except Exception as e:
-                print(f"[ProposalEngine ERROR] {e}")
-                time.sleep(15)
-
-    # ---------------------------------------------------
-    # PROPOSAL CREATION
-    # ---------------------------------------------------
-    def _generate_proposal(self):
-
-        if not self.deal_intelligence:
-            return None
-
-        if not self.deal_intelligence.deal_pipeline:
-            return None
-
-        deal = random.choice(self.deal_intelligence.deal_pipeline)
-
-        offer_types = [
-            "growth_retainer_package",
-            "performance_marketing_bundle",
-            "seo_authority_program",
-            "brand_scale_framework",
-            "conversion_acceleration_plan"
-        ]
-
-        delivery_models = [
-            "monthly_retainer",
-            "milestone_based",
-            "hybrid_execution",
-            "performance_linked"
-        ]
-
-        proposal = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "industry": deal["industry"],
-            "geo_target": deal["geo_target"],
-            "offer_type": random.choice(offer_types),
-            "delivery_model": random.choice(delivery_models),
-            "pricing_band": deal["pricing_band"],
-            "estimated_value": deal["estimated_value"],
-            "win_probability": deal["win_probability"],
-            "source": "Proposal Generation Engine"
-        }
-
-        self.state["active_template"] = proposal["offer_type"]
-
-        return proposal
-
-    # ---------------------------------------------------
-    # PUBLIC STATUS
-    # ---------------------------------------------------
-    def get_status(self) -> Dict[str, Any]:
         return {
-            "proposal_engine_active": self.active,
-            "state": self.state,
-            "proposal_pipeline_size": len(self.proposal_pipeline),
-            "history_size": len(self.history)
+            "tenant_id": tenant_id,
+            "engine": self.engine_name,
+            "version": self.version,
+            "timestamp": datetime.utcnow().isoformat(),
+
+            "proposal_summary": {
+                "opportunity_level": self._opportunity_label(opportunity_score),
+                "recommended_services": services,
+                "value_positioning": positioning,
+                "risk_assessment": risk_level,
+                "confidence_score": confidence,
+            },
+
+            "executive_recommendation":
+                self._executive_advice(confidence, risk_level)
         }
 
-    def shutdown(self):
-        self.active = False
+    # --------------------------------------------------
+    # INTERNAL INTELLIGENCE METHODS
+    # --------------------------------------------------
+
+    def _recommend_services(
+        self,
+        score: float,
+        context: Dict[str, Any]
+    ) -> List[str]:
+
+        industry = context.get("industry", "general")
+
+        services = []
+
+        if score > 0.75:
+            services.extend([
+                "Full Funnel Digital Marketing",
+                "Conversion Optimization",
+                "Performance Advertising"
+            ])
+        elif score > 0.5:
+            services.extend([
+                "SEO Growth Strategy",
+                "Content Marketing",
+                "Lead Generation Setup"
+            ])
+        else:
+            services.append("Market Position Audit")
+
+        if industry == "local_business":
+            services.append("Local SEO Optimization")
+
+        return services
+
+    # --------------------------------------------------
+
+    def _risk_analysis(self, deal_data: Dict[str, Any]) -> str:
+        competition = deal_data.get("competition_level", "medium")
+
+        if competition == "high":
+            return "Elevated"
+        elif competition == "low":
+            return "Minimal"
+
+        return "Moderate"
+
+    # --------------------------------------------------
+
+    def _value_positioning(self, revenue: float, score: float) -> str:
+
+        if revenue > 100000 and score > 0.7:
+            return "High-value strategic client"
+
+        if revenue > 25000:
+            return "Growth-stage opportunity"
+
+        return "Exploratory engagement"
+
+    # --------------------------------------------------
+
+    def _confidence_score(self, score: float, risk: str) -> float:
+
+        risk_modifier = {
+            "Minimal": 1.0,
+            "Moderate": 0.85,
+            "Elevated": 0.65
+        }
+
+        return round(score * risk_modifier.get(risk, 0.8), 2)
+
+    # --------------------------------------------------
+
+    def _opportunity_label(self, score: float) -> str:
+        if score > 0.75:
+            return "High"
+        if score > 0.5:
+            return "Medium"
+        return "Early"
+
+    # --------------------------------------------------
+
+    def _executive_advice(self, confidence: float, risk: str) -> str:
+
+        if confidence > 0.7:
+            return "Strong recommendation to pursue proposal."
+
+        if risk == "Elevated":
+            return "Proceed cautiously with strategic differentiation."
+
+        return "Validate client intent before resource allocation."
