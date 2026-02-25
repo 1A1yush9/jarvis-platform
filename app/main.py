@@ -9,6 +9,7 @@ import uuid
 # --------------------------------------------------
 
 from app.routes.proposal import router as proposal_router
+from app.routes.executive import router as executive_router
 
 # --------------------------------------------------
 # CORE SYSTEM IMPORTS
@@ -35,6 +36,7 @@ app = FastAPI(title="Jarvis Strategic Intelligence API")
 # --------------------------------------------------
 
 app.include_router(proposal_router, tags=["Proposal Intelligence"])
+app.include_router(executive_router, tags=["Executive Decision"])
 
 
 # --------------------------------------------------
@@ -51,7 +53,7 @@ revenue_intelligence = RevenueIntelligence()
 
 
 # --------------------------------------------------
-# HEALTH CHECK
+# HEALTH ENDPOINTS
 # --------------------------------------------------
 
 @app.get("/")
@@ -68,5 +70,6 @@ async def health_check():
     return {
         "status": "healthy",
         "kernel": "active",
-        "proposal_engine": "enabled"
+        "proposal_engine": "enabled",
+        "executive_engine": "enabled"
     }
