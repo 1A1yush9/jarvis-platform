@@ -8,6 +8,7 @@ from core.session_manager import SessionManager
 from core.memory import Memory
 from core.persistent_memory import PersistentMemory
 from core.telemetry import Telemetry
+from core.control_plane import ControlPlane
 
 app = FastAPI(title="Jarvis Strategic Intelligence API")
 
@@ -19,6 +20,7 @@ session_manager = SessionManager()
 memory = Memory()
 persistent_memory = PersistentMemory()
 telemetry = Telemetry()
+control_plane = ControlPlane()
 
 
 # --------------------------------------------------
@@ -29,9 +31,19 @@ telemetry = Telemetry()
 def health():
     return {
         "status": "Jarvis LIVE",
-        "mode": "advisory",
+        "control_plane": control_plane.status(),
         "telemetry": telemetry.status()
     }
+
+
+# --------------------------------------------------
+# CHANGE MODE ENDPOINT
+# --------------------------------------------------
+
+@app.post("/control/mode")
+def change_mode(payload: Dict[str, Any]):
+    mode = payload.get("mode", "")
+    return control_plane.set_mode(mode)
 
 
 # --------------------------------------------------
@@ -41,20 +53,21 @@ def health():
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
+    if not control_plane.allow_processing():
+        return {
+            "status": "maintenance_mode",
+            "message": "Processing temporarily disabled"
+        }
+
     start = telemetry.start_timer()
 
     try:
-        # SESSION
         session_id = payload.get("session_id") or str(uuid.uuid4())
         session_info = session_manager.get_session(session_id)
 
-        # SIGNALS
         signals = payload.get("signals", {})
-
-        # Existing pipeline placeholder
         awareness = {"status": "processed"}
 
-        # MEMORY
         memory.store(signals, awareness)
         persistent_memory.store(signals, awareness)
 
@@ -62,7 +75,7 @@ def analyze(payload: Dict[str, Any]):
 
         return {
             "session_id": session_id,
-            "session_info": session_info,
+            "mode": control_plane.status(),
             "telemetry": telemetry.status(),
             "notice": "Advisory intelligence only"
         }
