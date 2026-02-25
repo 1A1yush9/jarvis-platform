@@ -1,82 +1,77 @@
-# =====================================================
-# Memory System
-# Short-term + Long-term Learning
-# =====================================================
+# core/memory.py
 
-from app.core.memory_models import CampaignMemory
-from app.core.industry_brain import IndustryBrain
+"""
+Jarvis Memory System
+Safe Version — Render Compatible
+
+Purpose:
+Stores short-term cognitive records safely.
+No external execution.
+"""
+
+from typing import Dict, Any, List
+
+# --------------------------------------------------
+# SAFE OPTIONAL IMPORTS
+# (prevents boot crash if modules change)
+# --------------------------------------------------
+
+try:
+    from core.memory_models import CampaignMemory
+except Exception:
+    CampaignMemory = None
+
+try:
+    from core.industry_brain import IndustryBrain
+except Exception:
+    IndustryBrain = None
 
 
-# -----------------------------------------------------
-# Short-term runtime memory
-# -----------------------------------------------------
-class MemoryStore:
-    """
-    Temporary memory during server runtime.
-    """
+# --------------------------------------------------
+# MEMORY ENGINE
+# --------------------------------------------------
+
+class Memory:
 
     def __init__(self):
-        self.history = []
+        self.history: List[Dict[str, Any]] = []
 
-    def save(self, record: dict):
+    # ----------------------------------------------
+    # Store Memory Record
+    # ----------------------------------------------
+    def store(self, signals: Dict[str, Any], awareness: Dict[str, Any]):
+
+        record = {
+            "signals": signals,
+            "awareness": awareness
+        }
+
         self.history.append(record)
 
+        # keep bounded memory (safe for Render RAM)
+        if len(self.history) > 100:
+            self.history.pop(0)
+
+        return {"status": "stored", "count": len(self.history)}
+
+    # ----------------------------------------------
+    # Memory Summary
+    # ----------------------------------------------
+    def summary(self):
+
+        if not self.history:
+            return {
+                "total_records": 0,
+                "status": "empty"
+            }
+
+        return {
+            "total_records": len(self.history),
+            "status": "active"
+        }
+
+    # ----------------------------------------------
+    # Retrieve All
+    # ----------------------------------------------
     def all(self):
         return self.history
-
-
-# -----------------------------------------------------
-# Long-term AI learning memory
-# -----------------------------------------------------
-class MemoryBrain:
-
-    # ---------------------------------------------
-    # Store campaign learning
-    # ---------------------------------------------
-    @staticmethod
-    def store_campaign(db, data: dict):
-
-        record = CampaignMemory(
-            business_type=data["business_type"],
-            niche=data["niche"],
-            client_name=data["client_name"],
-            location=data["location"],
-            campaign_input=data["campaign_input"],
-            generated_strategy=data["generated_strategy"],
-            channels_used=data["channels_used"],
-            estimated_budget=data["estimated_budget"],
-            performance_score=data["performance_score"]
-        )
-
-        db.add(record)
-        db.commit()
-        db.refresh(record)
-
-        return record
-
-    # ---------------------------------------------
-    # Find similar campaigns (Industry Intelligence)
-    # ---------------------------------------------
-    @staticmethod
-    def find_similar(db, business_type: str):
-
-        related_industries = IndustryBrain.get_related_industries(
-            business_type
-        )
-
-        records = db.query(CampaignMemory).all()
-
-        similar = []
-
-        for r in records:
-            if r.business_type.lower() in [
-                i.lower() for i in related_industries
-            ]:
-                similar.append(r)
-
-        similar.sort(
-            key=lambda x: x.performance_score,
-            reverse=True
-        )
-
-        return similar[:5]
