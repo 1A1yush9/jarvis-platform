@@ -10,6 +10,7 @@ import uuid
 
 from app.routes.proposal import router as proposal_router
 from app.routes.executive import router as executive_router
+from app.routes.supervisor import router as supervisor_router
 
 # --------------------------------------------------
 # CORE SYSTEM IMPORTS
@@ -30,7 +31,7 @@ from core.revenue_intelligence import RevenueIntelligence
 
 app = FastAPI(
     title="Jarvis Strategic Intelligence API",
-    version="17.3",
+    version="17.4",
     description="Unified Intelligence Kernel — Advisory Mode"
 )
 
@@ -40,6 +41,7 @@ app = FastAPI(
 
 app.include_router(proposal_router, tags=["Proposal Intelligence"])
 app.include_router(executive_router, tags=["Executive Decision"])
+app.include_router(supervisor_router, tags=["Strategic Supervisor"])
 
 
 # --------------------------------------------------
@@ -65,7 +67,7 @@ async def root():
         "system": "Jarvis Strategic Intelligence",
         "status": "operational",
         "mode": "advisory_only",
-        "stage": "17.3"
+        "stage": "17.4"
     }
 
 
@@ -80,5 +82,6 @@ async def health_check():
         "kernel": "active",
         "proposal_engine": "enabled",
         "executive_engine": "enabled",
+        "strategic_supervisor": "enabled",
         "execution_authority": "disabled"
     }
