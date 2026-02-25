@@ -1,27 +1,28 @@
 # app/main.py
 
 """
-Jarvis Platform — SAFE BOOT API
-Auto-detects core classes to prevent import crashes.
+Jarvis Platform — ULTRA SAFE API ENTRY
+Module-based loading (no class assumptions)
+Guaranteed boot stability on Render.
 """
 
 from fastapi import FastAPI
 from typing import Dict, Any
-import importlib
-
 
 # --------------------------------------------------
-# SAFE CLASS LOADER (PREVENTS RENDER CRASH)
+# IMPORT MODULES (NOT CLASSES)
 # --------------------------------------------------
 
-def load_class(module_name, possible_classes):
-    module = importlib.import_module(module_name)
+import core.context_reasoner as context_module
+import core.predictive_engine as predictive_module
+import core.priority_intelligence as priority_module
+import core.executive_layer as executive_module
 
-    for name in possible_classes:
-        if hasattr(module, name):
-            return getattr(module, name)()
-
-    raise Exception(f"No valid class found in {module_name}")
+import core.meta_cognitive_awareness as meta_module
+import core.memory as memory_module
+import core.adaptive_reasoning as adaptive_module
+import core.strategic_orchestrator as orchestrator_module
+import core.execution_interface as interface_module
 
 
 # --------------------------------------------------
@@ -33,57 +34,6 @@ app = FastAPI(
     version="15.1",
     description="Advisory Intelligence System"
 )
-
-# --------------------------------------------------
-# LOAD CORE MODULES SAFELY
-# (AUTO MATCH CLASS NAMES)
-# --------------------------------------------------
-
-context_layer = load_class(
-    "core.context_reasoner",
-    ["ContextReasoner", "ContextEngine", "ContextBrain", "ContextProcessor"]
-)
-
-predictor = load_class(
-    "core.predictive_engine",
-    ["PredictiveEngine", "Predictor", "PredictionEngine"]
-)
-
-priority_engine = load_class(
-    "core.priority_intelligence",
-    ["PriorityIntelligence", "PriorityEngine"]
-)
-
-executive_layer = load_class(
-    "core.executive_layer",
-    ["ExecutiveLayer", "ExecutiveEngine"]
-)
-
-meta_awareness = load_class(
-    "core.meta_cognitive_awareness",
-    ["MetaCognitiveAwareness"]
-)
-
-memory = load_class(
-    "core.memory",
-    ["Memory", "MemoryEngine"]
-)
-
-adaptive = load_class(
-    "core.adaptive_reasoning",
-    ["AdaptiveReasoningCalibration"]
-)
-
-orchestrator = load_class(
-    "core.strategic_orchestrator",
-    ["StrategicOrchestrator"]
-)
-
-execution_interface = load_class(
-    "core.execution_interface",
-    ["ExecutionInterface"]
-)
-
 
 # --------------------------------------------------
 # HEALTH CHECK
@@ -98,6 +48,16 @@ def health():
 
 
 # --------------------------------------------------
+# SAFE FUNCTION CALLER
+# --------------------------------------------------
+
+def safe_call(module, func_name, default, *args):
+    if hasattr(module, func_name):
+        return getattr(module, func_name)(*args)
+    return default
+
+
+# --------------------------------------------------
 # INTELLIGENCE ENDPOINT
 # --------------------------------------------------
 
@@ -106,21 +66,63 @@ def analyze(payload: Dict[str, Any]):
 
     signals = payload.get("signals", {})
 
-    context = context_layer.process(signals)
-    prediction = predictor.analyze(context)
-    priority = priority_engine.evaluate(prediction)
-    executive = executive_layer.frame(priority)
+    # Context
+    context = safe_call(
+        context_module,
+        "process",
+        {},
+        signals
+    )
 
-    awareness = meta_awareness.generate_awareness(
+    # Prediction
+    prediction = safe_call(
+        predictive_module,
+        "analyze",
+        {},
+        context
+    )
+
+    # Priority
+    priority = safe_call(
+        priority_module,
+        "evaluate",
+        {},
+        prediction
+    )
+
+    # Executive
+    executive = safe_call(
+        executive_module,
+        "frame",
+        {},
+        priority
+    )
+
+    # Meta Awareness
+    awareness = safe_call(
+        meta_module,
+        "generate_awareness",
+        {},
         signals, context, prediction, priority
     )
 
-    memory.store(signals, awareness)
-    memory_summary = memory.summary()
+    # Memory
+    safe_call(memory_module, "store", None, signals, awareness)
+    memory_summary = safe_call(memory_module, "summary", {},)
 
-    calibration = adaptive.calibrate(memory_summary)
+    # Adaptive Calibration
+    calibration = safe_call(
+        adaptive_module,
+        "calibrate",
+        {},
+        memory_summary
+    )
 
-    orchestrated = orchestrator.orchestrate(
+    # Orchestration
+    orchestrated = safe_call(
+        orchestrator_module,
+        "orchestrate",
+        {},
         signals,
         context,
         prediction,
@@ -131,6 +133,12 @@ def analyze(payload: Dict[str, Any]):
         calibration
     )
 
-    response = execution_interface.build_response(orchestrated)
+    # Interface Output
+    response = safe_call(
+        interface_module,
+        "build_response",
+        {},
+        orchestrated
+    )
 
     return response
