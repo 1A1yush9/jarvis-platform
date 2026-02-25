@@ -9,6 +9,7 @@ from core.memory import Memory
 from core.persistent_memory import PersistentMemory
 from core.telemetry import Telemetry
 from core.control_plane import ControlPlane
+from core.access_control import AccessControl
 
 app = FastAPI(title="Jarvis Strategic Intelligence API")
 
@@ -21,6 +22,7 @@ memory = Memory()
 persistent_memory = PersistentMemory()
 telemetry = Telemetry()
 control_plane = ControlPlane()
+access_control = AccessControl()
 
 
 # --------------------------------------------------
@@ -31,19 +33,25 @@ control_plane = ControlPlane()
 def health():
     return {
         "status": "Jarvis LIVE",
-        "control_plane": control_plane.status(),
+        "mode": control_plane.status(),
         "telemetry": telemetry.status()
     }
 
 
 # --------------------------------------------------
-# CHANGE MODE ENDPOINT
+# CHANGE MODE (OWNER ONLY)
 # --------------------------------------------------
 
 @app.post("/control/mode")
 def change_mode(payload: Dict[str, Any]):
-    mode = payload.get("mode", "")
-    return control_plane.set_mode(mode)
+
+    api_key = payload.get("api_key", "")
+    role = access_control.get_role(api_key)
+
+    if not access_control.allowed(role, "control"):
+        return {"error": "permission_denied"}
+
+    return control_plane.set_mode(payload.get("mode", ""))
 
 
 # --------------------------------------------------
@@ -53,10 +61,16 @@ def change_mode(payload: Dict[str, Any]):
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
+    api_key = payload.get("api_key", "")
+    role = access_control.get_role(api_key)
+
+    if not access_control.allowed(role, "analyze"):
+        return {"error": "access_denied"}
+
     if not control_plane.allow_processing():
         return {
             "status": "maintenance_mode",
-            "message": "Processing temporarily disabled"
+            "message": "Processing disabled"
         }
 
     start = telemetry.start_timer()
@@ -74,8 +88,8 @@ def analyze(payload: Dict[str, Any]):
         telemetry.end_timer(start)
 
         return {
+            "role": role,
             "session_id": session_id,
-            "mode": control_plane.status(),
             "telemetry": telemetry.status(),
             "notice": "Advisory intelligence only"
         }
