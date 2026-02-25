@@ -7,6 +7,7 @@ import uuid
 from core.session_manager import SessionManager
 from core.memory import Memory
 from core.persistent_memory import PersistentMemory
+from core.telemetry import Telemetry
 
 app = FastAPI(title="Jarvis Strategic Intelligence API")
 
@@ -17,6 +18,7 @@ app = FastAPI(title="Jarvis Strategic Intelligence API")
 session_manager = SessionManager()
 memory = Memory()
 persistent_memory = PersistentMemory()
+telemetry = Telemetry()
 
 
 # --------------------------------------------------
@@ -25,7 +27,11 @@ persistent_memory = PersistentMemory()
 
 @app.get("/")
 def health():
-    return {"status": "Jarvis LIVE", "mode": "advisory"}
+    return {
+        "status": "Jarvis LIVE",
+        "mode": "advisory",
+        "telemetry": telemetry.status()
+    }
 
 
 # --------------------------------------------------
@@ -35,26 +41,35 @@ def health():
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
-    # SESSION
-    session_id = payload.get("session_id") or str(uuid.uuid4())
-    session_info = session_manager.get_session(session_id)
+    start = telemetry.start_timer()
 
-    # SIGNALS
-    signals = payload.get("signals", {})
+    try:
+        # SESSION
+        session_id = payload.get("session_id") or str(uuid.uuid4())
+        session_info = session_manager.get_session(session_id)
 
-    # Simulated awareness output (existing pipeline)
-    awareness = {"status": "processed"}
+        # SIGNALS
+        signals = payload.get("signals", {})
 
-    # In-memory memory
-    memory.store(signals, awareness)
+        # Existing pipeline placeholder
+        awareness = {"status": "processed"}
 
-    # Persistent memory (NEW)
-    persistent_memory.store(signals, awareness)
+        # MEMORY
+        memory.store(signals, awareness)
+        persistent_memory.store(signals, awareness)
 
-    return {
-        "session_id": session_id,
-        "session_info": session_info,
-        "memory_status": "stored",
-        "persistent_records": len(persistent_memory.recent()),
-        "notice": "Advisory intelligence only"
-    }
+        telemetry.end_timer(start)
+
+        return {
+            "session_id": session_id,
+            "session_info": session_info,
+            "telemetry": telemetry.status(),
+            "notice": "Advisory intelligence only"
+        }
+
+    except Exception as e:
+        telemetry.record_error()
+        return {
+            "error": str(e),
+            "telemetry": telemetry.status()
+        }
