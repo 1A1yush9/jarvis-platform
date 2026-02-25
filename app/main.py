@@ -1,109 +1,123 @@
+# app/main.py
+
+"""
+Jarvis Platform — Unified Intelligence API
+Production Safe Main Entry
+
+Role:
+API orchestration only.
+No intelligence logic implemented here.
+
+Pipeline:
+Signals → Context → Prediction → Priority
+→ Executive → Meta Awareness → Memory
+→ Adaptive Calibration → Strategic Orchestrator
+→ Executive Interface → API Response
+"""
+
 from fastapi import FastAPI
-from datetime import datetime
+from typing import Dict, Any
 
-from core.unified_kernel import unified_kernel
-from core.signal_fusion import signal_fusion
-from core.context_reasoner import context_reasoner
-from core.predictive_engine import predictive_engine
-from core.priority_intelligence import priority_intelligence
-from core.executive_layer import executive_layer
+# -----------------------------
+# Core Intelligence Imports
+# -----------------------------
+from core.contextual_reasoning import ContextualReasoningLayer
+from core.predictive_reasoning import PredictiveReasoningEngine
+from core.strategic_priority import StrategicPriorityIntelligence
+from core.executive_decision import ExecutiveDecisionLayer
+from core.meta_cognitive_awareness import MetaCognitiveAwareness
+from core.cognitive_memory import CognitiveMemory
+from core.adaptive_reasoning import AdaptiveReasoningCalibration
+from core.strategic_orchestrator import StrategicIntelligenceOrchestrator
+from core.executive_interface import ExecutiveIntelligenceInterface
 
-app = FastAPI(title="Jarvis Cognitive Core")
 
-# ---------------------------------------------------
-# ROOT
-# ---------------------------------------------------
+# -----------------------------
+# App Initialization
+# -----------------------------
+app = FastAPI(
+    title="Jarvis Strategic Intelligence API",
+    version="15.1",
+    description="Advisory Intelligence System — No Execution Authority"
+)
 
+# -----------------------------
+# Instantiate Cognitive Modules
+# (Loaded once at boot)
+# -----------------------------
+context_layer = ContextualReasoningLayer()
+predictor = PredictiveReasoningEngine()
+priority_engine = StrategicPriorityIntelligence()
+executive_layer = ExecutiveDecisionLayer()
+meta_awareness = MetaCognitiveAwareness()
+memory = CognitiveMemory()
+adaptive = AdaptiveReasoningCalibration()
+orchestrator = StrategicIntelligenceOrchestrator()
+executive_interface = ExecutiveIntelligenceInterface()
+
+
+# -----------------------------
+# Health Check
+# -----------------------------
 @app.get("/")
-def root():
+def health_check():
     return {
-        "system": "Jarvis Platform",
-        "status": "LIVE",
-        "stage": "14.5 - Executive Decision Layer",
-        "timestamp": datetime.utcnow().isoformat()
+        "status": "Jarvis LIVE",
+        "mode": "advisory",
+        "stage": "15.1",
+        "system": "Unified Intelligence Kernel Active"
     }
 
 
-# ---------------------------------------------------
-# STATUS ENDPOINTS
-# ---------------------------------------------------
+# -----------------------------
+# Intelligence Endpoint
+# -----------------------------
+@app.post("/analyze")
+def analyze(payload: Dict[str, Any]):
 
-@app.get("/fusion/status")
-def fusion_status():
-    return signal_fusion.status()
+    # 1️⃣ Input Signals
+    signals = payload.get("signals", {})
 
+    # 2️⃣ Contextual Reasoning
+    context = context_layer.process(signals)
 
-@app.get("/context/status")
-def context_status():
-    return context_reasoner.status()
+    # 3️⃣ Predictive Reasoning
+    prediction = predictor.analyze(context)
 
+    # 4️⃣ Strategic Priority
+    priority = priority_engine.evaluate(prediction)
 
-@app.get("/prediction/status")
-def prediction_status():
-    return predictive_engine.status()
+    # 5️⃣ Executive Decision Framing
+    executive = executive_layer.frame(priority)
 
-
-@app.get("/priority/status")
-def priority_status():
-    return priority_intelligence.status()
-
-
-@app.get("/executive/status")
-def executive_status():
-    return executive_layer.status()
-
-
-@app.get("/kernel/status")
-def kernel_status():
-    return unified_kernel.status()
-
-
-# ---------------------------------------------------
-# FULL COGNITIVE PIPELINE
-# ---------------------------------------------------
-
-@app.post("/kernel/evaluate")
-def kernel_evaluate():
-
-    # 1️⃣ Signals
-    signals = signal_fusion.collect_signals()
-
-    # 2️⃣ Context
-    context = context_reasoner.analyze(signals)
-
-    # 3️⃣ Prediction
-    prediction = predictive_engine.forecast(signals, context)
-
-    # 4️⃣ Priority
-    priority = priority_intelligence.evaluate(
-        signals,
-        context,
-        prediction
-    )
-
-    # 5️⃣ Executive Framing
-    executive = executive_layer.synthesize(
+    # 6️⃣ Meta-Cognitive Awareness
+    awareness = meta_awareness.generate_awareness(
         signals,
         context,
         prediction,
         priority
     )
 
-    # 6️⃣ Kernel Evaluation
-    unified_kernel.update_state(
-        clients_active=signals["clients_active"],
-        execution_load=signals["execution_load"],
-        revenue_velocity=signals["revenue_velocity"],
-        market_opportunity_score=signals["market_opportunity_score"],
+    # 7️⃣ Cognitive Memory
+    memory.store_memory(signals, awareness)
+    memory_summary = memory.summarize_memory()
+
+    # 8️⃣ Adaptive Reasoning Calibration
+    calibration = adaptive.calibrate(memory_summary)
+
+    # 9️⃣ Strategic Intelligence Orchestration
+    orchestrated = orchestrator.orchestrate(
+        signals,
+        context,
+        prediction,
+        priority,
+        executive,
+        awareness,
+        memory_summary,
+        calibration
     )
 
-    decision = unified_kernel.evaluate()
+    # 🔟 Executive Intelligence Interface (API Output)
+    response = executive_interface.build_response(orchestrated)
 
-    return {
-        "signals": signals,
-        "context": context,
-        "prediction": prediction,
-        "priority": priority,
-        "executive": executive,
-        "decision": decision
-    }
+    return response
