@@ -6,6 +6,7 @@ import uuid
 
 from core.session_manager import SessionManager
 from core.memory import Memory
+from core.persistent_memory import PersistentMemory
 
 app = FastAPI(title="Jarvis Strategic Intelligence API")
 
@@ -15,6 +16,7 @@ app = FastAPI(title="Jarvis Strategic Intelligence API")
 
 session_manager = SessionManager()
 memory = Memory()
+persistent_memory = PersistentMemory()
 
 
 # --------------------------------------------------
@@ -33,26 +35,26 @@ def health():
 @app.post("/analyze")
 def analyze(payload: Dict[str, Any]):
 
-    # ---------------- SESSION ----------------
-    session_id = payload.get("session_id")
-
-    if not session_id:
-        session_id = str(uuid.uuid4())
-
+    # SESSION
+    session_id = payload.get("session_id") or str(uuid.uuid4())
     session_info = session_manager.get_session(session_id)
 
-    # ---------------- SIGNALS ----------------
+    # SIGNALS
     signals = payload.get("signals", {})
 
-    # (pipeline already running internally)
+    # Simulated awareness output (existing pipeline)
     awareness = {"status": "processed"}
 
+    # In-memory memory
     memory.store(signals, awareness)
-    memory_summary = memory.summary()
+
+    # Persistent memory (NEW)
+    persistent_memory.store(signals, awareness)
 
     return {
         "session_id": session_id,
         "session_info": session_info,
-        "memory": memory_summary,
+        "memory_status": "stored",
+        "persistent_records": len(persistent_memory.recent()),
         "notice": "Advisory intelligence only"
     }
