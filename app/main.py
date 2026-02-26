@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 18.5 Integrated
+Production Safe — Stage 19.0 Integrated
 """
 
 from fastapi import FastAPI
@@ -9,11 +9,11 @@ from typing import Dict, Any, List
 from core.strategic_alignment_engine import StrategicAlignmentEngine
 from core.adaptive_strategy_memory import AdaptiveStrategyMemory
 from core.predictive_stability_engine import PredictiveStabilityEngine
-from core.adaptive_strategy_memory import AdaptiveStrategyMemory
+from core.executive_dashboard_api import ExecutiveDashboardAPI
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="18.5",
+    version="19.0",
 )
 
 # -----------------------------------------------------
@@ -24,9 +24,14 @@ alignment_engine = StrategicAlignmentEngine()
 adaptive_memory = AdaptiveStrategyMemory()
 predictive_engine = PredictiveStabilityEngine()
 
+dashboard_api = ExecutiveDashboardAPI(
+    alignment_engine,
+    adaptive_memory,
+    predictive_engine,
+)
 
 # -----------------------------------------------------
-# Root Health
+# Root
 # -----------------------------------------------------
 @app.get("/")
 def root():
@@ -34,12 +39,12 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "18.5",
+        "stage": "19.0",
     }
 
 
 # -----------------------------------------------------
-# Alignment Engine
+# Alignment
 # -----------------------------------------------------
 @app.get("/alignment/status")
 def alignment_status():
@@ -59,16 +64,14 @@ def evaluate_alignment(payload: Dict[str, Any]):
         },
     )
 
-    result = alignment_engine.evaluate_alignment(
-        decisions=decisions,
-        platform_objectives=objectives,
+    return alignment_engine.evaluate_alignment(
+        decisions,
+        objectives,
     )
-
-    return result
 
 
 # -----------------------------------------------------
-# Adaptive Memory
+# Memory
 # -----------------------------------------------------
 @app.post("/memory/record")
 def record_alignment(payload: Dict[str, Any]):
@@ -86,7 +89,7 @@ def memory_status():
 
 
 # -----------------------------------------------------
-# Predictive Stability Engine
+# Predictive Stability
 # -----------------------------------------------------
 @app.get("/predictive/status")
 def predictive_status():
@@ -96,3 +99,16 @@ def predictive_status():
 @app.get("/predictive/forecast")
 def predictive_forecast():
     return predictive_engine.forecast()
+
+
+# -----------------------------------------------------
+# Executive Dashboard (NEW)
+# -----------------------------------------------------
+@app.get("/executive/snapshot")
+def executive_snapshot():
+    return dashboard_api.generate_snapshot()
+
+
+@app.get("/executive/status")
+def executive_status():
+    return dashboard_api.status()
