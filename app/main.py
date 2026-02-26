@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 23.0 Integrated
+Production Safe — Stage 23.5 Integrated
 """
 
 from fastapi import FastAPI
@@ -19,15 +19,12 @@ from core.strategic_narrative_engine import StrategicNarrativeEngine
 from core.intelligence_confidence_engine import IntelligenceConfidenceEngine
 from core.executive_risk_radar import ExecutiveRiskRadar
 from core.strategic_drift_explainer import StrategicDriftExplainer
+from core.executive_decision_simulator import ExecutiveDecisionSimulator
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="23.0",
+    version="23.5",
 )
-
-# -----------------------------------------------------
-# Engine Initialization
-# -----------------------------------------------------
 
 alignment_engine = StrategicAlignmentEngine()
 adaptive_memory = AdaptiveStrategyMemory()
@@ -51,10 +48,7 @@ continuous_cycle = ContinuousIntelligenceCycle(
     predictive_engine,
 )
 
-signal_prioritizer = ExecutiveSignalPrioritizer(
-    continuous_cycle
-)
-
+signal_prioritizer = ExecutiveSignalPrioritizer(continuous_cycle)
 narrative_engine = StrategicNarrativeEngine(signal_prioritizer)
 
 confidence_engine = IntelligenceConfidenceEngine(
@@ -76,28 +70,24 @@ drift_explainer = StrategicDriftExplainer(
     risk_radar,
 )
 
-# -----------------------------------------------------
-# Startup
-# -----------------------------------------------------
+decision_simulator = ExecutiveDecisionSimulator(
+    predictive_engine,
+    risk_radar,
+)
+
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(continuous_cycle.start_cycle())
 
-# -----------------------------------------------------
-# Root
-# -----------------------------------------------------
 @app.get("/")
 def root():
     return {
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "23.0",
+        "stage": "23.5",
     }
 
-# -----------------------------------------------------
-# Core APIs
-# -----------------------------------------------------
 @app.post("/alignment/evaluate")
 def evaluate_alignment(payload: Dict[str, Any]):
     decisions: List[Dict[str, Any]] = payload.get("decisions", [])
@@ -111,49 +101,23 @@ def evaluate_alignment(payload: Dict[str, Any]):
 def record_alignment(payload: Dict[str, Any]):
     return adaptive_memory.record_alignment_event(payload)
 
-@app.get("/predictive/forecast")
-def predictive_forecast():
-    return predictive_engine.forecast()
-
 @app.get("/executive/snapshot")
 def executive_snapshot():
     return dashboard_api.generate_snapshot()
-
-@app.get("/client/{client_id}/snapshot")
-def client_snapshot(client_id: str):
-    return client_router.client_snapshot(client_id)
-
-@app.get("/insights/generate")
-def generate_insights():
-    return insight_engine.generate_insights()
-
-@app.get("/cycle/state")
-def cycle_state():
-    return continuous_cycle.get_state()
-
-@app.get("/signals/prioritized")
-def prioritized_signals():
-    return signal_prioritizer.prioritize()
-
-@app.get("/narrative/briefing")
-def narrative_briefing():
-    return narrative_engine.generate_narrative()
-
-@app.get("/confidence/evaluate")
-def confidence_evaluate():
-    return confidence_engine.evaluate_confidence()
 
 @app.get("/risk/evaluate")
 def risk_evaluate():
     return risk_radar.evaluate_risk()
 
-# -----------------------------------------------------
-# DRIFT EXPLANATION (NEW)
-# -----------------------------------------------------
 @app.get("/drift/explain")
 def drift_explain():
     return drift_explainer.explain()
 
-@app.get("/drift/status")
-def drift_status():
-    return drift_explainer.status()
+# ---------------- NEW SIMULATION ----------------
+@app.post("/decision/simulate")
+def decision_simulate(payload: Dict[str, Any]):
+    return decision_simulator.simulate(payload)
+
+@app.get("/decision/status")
+def decision_status():
+    return decision_simulator.status()
