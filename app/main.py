@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 21.0 Integrated
+Production Safe — Stage 21.5 Integrated
 """
 
 from fastapi import FastAPI
@@ -15,10 +15,11 @@ from core.client_intelligence_router import ClientIntelligenceRouter
 from core.autonomous_insight_engine import AutonomousInsightEngine
 from core.continuous_intelligence_cycle import ContinuousIntelligenceCycle
 from core.executive_signal_prioritizer import ExecutiveSignalPrioritizer
+from core.strategic_narrative_engine import StrategicNarrativeEngine
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="21.0",
+    version="21.5",
 )
 
 # -----------------------------------------------------
@@ -51,6 +52,10 @@ signal_prioritizer = ExecutiveSignalPrioritizer(
     continuous_cycle
 )
 
+narrative_engine = StrategicNarrativeEngine(
+    signal_prioritizer
+)
+
 # -----------------------------------------------------
 # Startup
 # -----------------------------------------------------
@@ -67,7 +72,7 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "21.0",
+        "stage": "21.5",
     }
 
 # -----------------------------------------------------
@@ -110,12 +115,19 @@ def cycle_state():
     return continuous_cycle.get_state()
 
 # -----------------------------------------------------
-# PRIORITIZED EXECUTIVE SIGNALS (NEW)
+# Signals
 # -----------------------------------------------------
 @app.get("/signals/prioritized")
 def prioritized_signals():
     return signal_prioritizer.prioritize()
 
-@app.get("/signals/status")
-def prioritizer_status():
-    return signal_prioritizer.status()
+# -----------------------------------------------------
+# STRATEGIC NARRATIVE (NEW)
+# -----------------------------------------------------
+@app.get("/narrative/briefing")
+def narrative_briefing():
+    return narrative_engine.generate_narrative()
+
+@app.get("/narrative/status")
+def narrative_status():
+    return narrative_engine.status()
