@@ -18,6 +18,7 @@ from core.executive_continuity_kernel import ExecutiveContinuityKernel
 from core.executive_strategic_consciousness import ExecutiveStrategicConsciousness
 from core.executive_reality_alignment import ExecutiveRealityAlignment
 from core.executive_adaptive_doctrine import ExecutiveAdaptiveDoctrine
+from core.strategic_paradox_resolver import StrategicParadoxResolver
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
@@ -38,13 +39,14 @@ continuity_kernel = ExecutiveContinuityKernel()
 strategic_consciousness = ExecutiveStrategicConsciousness()
 reality_alignment = ExecutiveRealityAlignment()
 adaptive_doctrine = ExecutiveAdaptiveDoctrine()
+paradox_resolver = StrategicParadoxResolver()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "32.0",
+        "stage": "32.5",
         "mode": "Advisory Cognition Only",
     }
 
@@ -110,9 +112,7 @@ def executive_alignment(payload: Dict[str, Any]):
         meta_strategy_result,
     )
 
-    awareness_result = awareness_loop.update_awareness(
-        calibration_result
-    )
+    awareness_result = awareness_loop.update_awareness(calibration_result)
 
     meta_reasoning_result = meta_reasoning.evaluate_reasoning(
         meta_strategy_result,
@@ -156,8 +156,15 @@ def executive_alignment(payload: Dict[str, Any]):
         reality_alignment_result,
     )
 
+    paradox_result = paradox_resolver.evaluate_paradox(
+        foresight_result,
+        pressure_result,
+        equilibrium_result,
+        doctrine_result,
+    )
+
     return {
-        "stage": "32.0",
+        "stage": "32.5",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
@@ -175,4 +182,5 @@ def executive_alignment(payload: Dict[str, Any]):
         "strategic_consciousness": consciousness_result,
         "reality_alignment": reality_alignment_result,
         "adaptive_doctrine": doctrine_result,
+        "strategic_paradox": paradox_result,
     }
