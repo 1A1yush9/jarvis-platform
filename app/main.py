@@ -14,6 +14,7 @@ from core.strategic_awareness_loop import StrategicAwarenessLoop
 from core.executive_meta_reasoning import ExecutiveMetaReasoning
 from core.executive_cognitive_stability import ExecutiveCognitiveStability
 from core.executive_intelligence_convergence import ExecutiveIntelligenceConvergence
+from core.executive_continuity_kernel import ExecutiveContinuityKernel
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
@@ -30,13 +31,14 @@ awareness_loop = StrategicAwarenessLoop()
 meta_reasoning = ExecutiveMetaReasoning()
 cognitive_stability = ExecutiveCognitiveStability()
 convergence_engine = ExecutiveIntelligenceConvergence()
+continuity_kernel = ExecutiveContinuityKernel()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "30.0",
+        "stage": "30.5",
         "mode": "Advisory Cognition Only",
     }
 
@@ -128,8 +130,12 @@ def executive_alignment(payload: Dict[str, Any]):
         stability_result,
     )
 
+    continuity_result = continuity_kernel.update_continuity(
+        convergence_result
+    )
+
     return {
-        "stage": "30.0",
+        "stage": "30.5",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
@@ -143,4 +149,5 @@ def executive_alignment(payload: Dict[str, Any]):
         "meta_reasoning": meta_reasoning_result,
         "cognitive_stability": stability_result,
         "executive_intelligence": convergence_result,
+        "executive_continuity": continuity_result,
     }
