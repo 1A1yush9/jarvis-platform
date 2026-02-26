@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 22.5 Integrated
+Production Safe — Stage 23.0 Integrated
 """
 
 from fastapi import FastAPI
@@ -18,10 +18,11 @@ from core.executive_signal_prioritizer import ExecutiveSignalPrioritizer
 from core.strategic_narrative_engine import StrategicNarrativeEngine
 from core.intelligence_confidence_engine import IntelligenceConfidenceEngine
 from core.executive_risk_radar import ExecutiveRiskRadar
+from core.strategic_drift_explainer import StrategicDriftExplainer
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="22.5",
+    version="23.0",
 )
 
 # -----------------------------------------------------
@@ -54,9 +55,7 @@ signal_prioritizer = ExecutiveSignalPrioritizer(
     continuous_cycle
 )
 
-narrative_engine = StrategicNarrativeEngine(
-    signal_prioritizer
-)
+narrative_engine = StrategicNarrativeEngine(signal_prioritizer)
 
 confidence_engine = IntelligenceConfidenceEngine(
     adaptive_memory,
@@ -68,6 +67,13 @@ risk_radar = ExecutiveRiskRadar(
     predictive_engine,
     confidence_engine,
     signal_prioritizer,
+)
+
+drift_explainer = StrategicDriftExplainer(
+    adaptive_memory,
+    predictive_engine,
+    confidence_engine,
+    risk_radar,
 )
 
 # -----------------------------------------------------
@@ -86,7 +92,7 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "22.5",
+        "stage": "23.0",
     }
 
 # -----------------------------------------------------
@@ -137,13 +143,17 @@ def narrative_briefing():
 def confidence_evaluate():
     return confidence_engine.evaluate_confidence()
 
-# -----------------------------------------------------
-# EXECUTIVE RISK RADAR (NEW)
-# -----------------------------------------------------
 @app.get("/risk/evaluate")
 def risk_evaluate():
     return risk_radar.evaluate_risk()
 
-@app.get("/risk/status")
-def risk_status():
-    return risk_radar.status()
+# -----------------------------------------------------
+# DRIFT EXPLANATION (NEW)
+# -----------------------------------------------------
+@app.get("/drift/explain")
+def drift_explain():
+    return drift_explainer.explain()
+
+@app.get("/drift/status")
+def drift_status():
+    return drift_explainer.status()
