@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 19.0 Integrated
+Production Safe — Stage 19.5 Integrated
 """
 
 from fastapi import FastAPI
@@ -10,10 +10,11 @@ from core.strategic_alignment_engine import StrategicAlignmentEngine
 from core.adaptive_strategy_memory import AdaptiveStrategyMemory
 from core.predictive_stability_engine import PredictiveStabilityEngine
 from core.executive_dashboard_api import ExecutiveDashboardAPI
+from core.client_intelligence_router import ClientIntelligenceRouter
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="19.0",
+    version="19.5",
 )
 
 # -----------------------------------------------------
@@ -30,6 +31,8 @@ dashboard_api = ExecutiveDashboardAPI(
     predictive_engine,
 )
 
+client_router = ClientIntelligenceRouter(dashboard_api)
+
 # -----------------------------------------------------
 # Root
 # -----------------------------------------------------
@@ -39,9 +42,8 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "19.0",
+        "stage": "19.5",
     }
-
 
 # -----------------------------------------------------
 # Alignment
@@ -69,7 +71,6 @@ def evaluate_alignment(payload: Dict[str, Any]):
         objectives,
     )
 
-
 # -----------------------------------------------------
 # Memory
 # -----------------------------------------------------
@@ -87,7 +88,6 @@ def analyze_memory():
 def memory_status():
     return adaptive_memory.status()
 
-
 # -----------------------------------------------------
 # Predictive Stability
 # -----------------------------------------------------
@@ -100,9 +100,8 @@ def predictive_status():
 def predictive_forecast():
     return predictive_engine.forecast()
 
-
 # -----------------------------------------------------
-# Executive Dashboard (NEW)
+# Executive Dashboard
 # -----------------------------------------------------
 @app.get("/executive/snapshot")
 def executive_snapshot():
@@ -112,3 +111,15 @@ def executive_snapshot():
 @app.get("/executive/status")
 def executive_status():
     return dashboard_api.status()
+
+# -----------------------------------------------------
+# CLIENT INTELLIGENCE (NEW)
+# -----------------------------------------------------
+@app.get("/client/{client_id}/snapshot")
+def client_snapshot(client_id: str):
+    return client_router.client_snapshot(client_id)
+
+
+@app.get("/client/status")
+def client_router_status():
+    return client_router.status()
