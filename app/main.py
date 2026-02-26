@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 19.5 Integrated
+Production Safe — Stage 20.0 Integrated
 """
 
 from fastapi import FastAPI
@@ -11,10 +11,11 @@ from core.adaptive_strategy_memory import AdaptiveStrategyMemory
 from core.predictive_stability_engine import PredictiveStabilityEngine
 from core.executive_dashboard_api import ExecutiveDashboardAPI
 from core.client_intelligence_router import ClientIntelligenceRouter
+from core.autonomous_insight_engine import AutonomousInsightEngine
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="19.5",
+    version="20.0",
 )
 
 # -----------------------------------------------------
@@ -33,6 +34,11 @@ dashboard_api = ExecutiveDashboardAPI(
 
 client_router = ClientIntelligenceRouter(dashboard_api)
 
+insight_engine = AutonomousInsightEngine(
+    adaptive_memory,
+    predictive_engine,
+)
+
 # -----------------------------------------------------
 # Root
 # -----------------------------------------------------
@@ -42,7 +48,7 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "19.5",
+        "stage": "20.0",
     }
 
 # -----------------------------------------------------
@@ -66,10 +72,7 @@ def evaluate_alignment(payload: Dict[str, Any]):
         },
     )
 
-    return alignment_engine.evaluate_alignment(
-        decisions,
-        objectives,
-    )
+    return alignment_engine.evaluate_alignment(decisions, objectives)
 
 # -----------------------------------------------------
 # Memory
@@ -108,18 +111,21 @@ def executive_snapshot():
     return dashboard_api.generate_snapshot()
 
 
-@app.get("/executive/status")
-def executive_status():
-    return dashboard_api.status()
-
 # -----------------------------------------------------
-# CLIENT INTELLIGENCE (NEW)
+# Client Intelligence
 # -----------------------------------------------------
 @app.get("/client/{client_id}/snapshot")
 def client_snapshot(client_id: str):
     return client_router.client_snapshot(client_id)
 
+# -----------------------------------------------------
+# Autonomous Insights (NEW)
+# -----------------------------------------------------
+@app.get("/insights/generate")
+def generate_insights():
+    return insight_engine.generate_insights()
 
-@app.get("/client/status")
-def client_router_status():
-    return client_router.status()
+
+@app.get("/insights/status")
+def insight_status():
+    return insight_engine.status()
