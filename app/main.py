@@ -8,6 +8,7 @@ from core.cognitive_consistency_governor import CognitiveConsistencyGovernor
 from core.executive_foresight_engine import ExecutiveForesightEngine
 from core.strategic_pressure_analyzer import StrategicPressureAnalyzer
 from core.executive_equilibrium_engine import ExecutiveEquilibriumEngine
+from core.meta_strategy_synthesizer import MetaStrategySynthesizer
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
@@ -18,19 +19,20 @@ consistency_governor = CognitiveConsistencyGovernor()
 foresight_engine = ExecutiveForesightEngine()
 pressure_analyzer = StrategicPressureAnalyzer()
 equilibrium_engine = ExecutiveEquilibriumEngine()
+meta_synthesizer = MetaStrategySynthesizer()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "27.0",
+        "stage": "27.5",
         "mode": "Advisory Cognition Only",
     }
 
 
 # ---------------------------------------------------
-# Full Executive Cognitive Stack + Equilibrium
+# Full Executive Cognitive Stack + Meta Strategy
 # ---------------------------------------------------
 @app.post("/executive/alignment")
 def executive_alignment(payload: Dict[str, Any]):
@@ -75,8 +77,17 @@ def executive_alignment(payload: Dict[str, Any]):
         pressure_result,
     )
 
+    meta_strategy_result = meta_synthesizer.synthesize(
+        alignment_result,
+        intent_result,
+        consistency_result,
+        foresight_result,
+        pressure_result,
+        equilibrium_result,
+    )
+
     return {
-        "stage": "27.0",
+        "stage": "27.5",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
@@ -84,4 +95,5 @@ def executive_alignment(payload: Dict[str, Any]):
         "executive_foresight": foresight_result,
         "strategic_pressure": pressure_result,
         "executive_equilibrium": equilibrium_result,
+        "meta_strategy": meta_strategy_result,
     }
