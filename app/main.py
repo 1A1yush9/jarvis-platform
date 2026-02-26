@@ -19,6 +19,7 @@ from core.executive_strategic_consciousness import ExecutiveStrategicConsciousne
 from core.executive_reality_alignment import ExecutiveRealityAlignment
 from core.executive_adaptive_doctrine import ExecutiveAdaptiveDoctrine
 from core.strategic_paradox_resolver import StrategicParadoxResolver
+from core.executive_strategic_compass import ExecutiveStrategicCompass
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
@@ -40,13 +41,14 @@ strategic_consciousness = ExecutiveStrategicConsciousness()
 reality_alignment = ExecutiveRealityAlignment()
 adaptive_doctrine = ExecutiveAdaptiveDoctrine()
 paradox_resolver = StrategicParadoxResolver()
+strategic_compass = ExecutiveStrategicCompass()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "32.5",
+        "stage": "33.0",
         "mode": "Advisory Cognition Only",
     }
 
@@ -65,7 +67,6 @@ def executive_alignment(payload: Dict[str, Any]):
     )
 
     memory_result = strategic_memory.store_snapshot(alignment_result)
-
     intent_result = intent_model.model_intent()
 
     consistency_result = consistency_governor.evaluate_consistency(
@@ -163,8 +164,16 @@ def executive_alignment(payload: Dict[str, Any]):
         doctrine_result,
     )
 
+    compass_result = strategic_compass.evaluate_direction(
+        foresight_result,
+        pressure_result,
+        equilibrium_result,
+        doctrine_result,
+        paradox_result,
+    )
+
     return {
-        "stage": "32.5",
+        "stage": "33.0",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
@@ -183,4 +192,5 @@ def executive_alignment(payload: Dict[str, Any]):
         "reality_alignment": reality_alignment_result,
         "adaptive_doctrine": doctrine_result,
         "strategic_paradox": paradox_result,
+        "strategic_compass": compass_result,
     }
