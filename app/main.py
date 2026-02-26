@@ -4,25 +4,27 @@ from typing import Dict, Any
 from core.executive_alignment_engine import ExecutiveAlignmentEngine
 from core.strategic_memory import StrategicMemory
 from core.executive_intent_model import ExecutiveIntentModel
+from core.cognitive_consistency_governor import CognitiveConsistencyGovernor
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
 alignment_engine = ExecutiveAlignmentEngine()
 strategic_memory = StrategicMemory()
 intent_model = ExecutiveIntentModel()
+consistency_governor = CognitiveConsistencyGovernor()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "25.0",
+        "stage": "25.5",
         "mode": "Advisory Cognition Only",
     }
 
 
 # ---------------------------------------------------
-# Alignment + Memory + Intent Modeling
+# Full Executive Cognitive Evaluation
 # ---------------------------------------------------
 @app.post("/executive/alignment")
 def executive_alignment(payload: Dict[str, Any]):
@@ -41,9 +43,16 @@ def executive_alignment(payload: Dict[str, Any]):
 
     intent_result = intent_model.model_intent()
 
+    consistency_result = consistency_governor.evaluate_consistency(
+        alignment_result,
+        intent_result,
+        simulation_output,
+    )
+
     return {
-        "stage": "25.0",
+        "stage": "25.5",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
+        "cognitive_consistency": consistency_result,
     }
