@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 21.5 Integrated
+Production Safe — Stage 22.0 Integrated
 """
 
 from fastapi import FastAPI
@@ -16,10 +16,11 @@ from core.autonomous_insight_engine import AutonomousInsightEngine
 from core.continuous_intelligence_cycle import ContinuousIntelligenceCycle
 from core.executive_signal_prioritizer import ExecutiveSignalPrioritizer
 from core.strategic_narrative_engine import StrategicNarrativeEngine
+from core.intelligence_confidence_engine import IntelligenceConfidenceEngine
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="21.5",
+    version="22.0",
 )
 
 # -----------------------------------------------------
@@ -56,6 +57,12 @@ narrative_engine = StrategicNarrativeEngine(
     signal_prioritizer
 )
 
+confidence_engine = IntelligenceConfidenceEngine(
+    adaptive_memory,
+    predictive_engine,
+    continuous_cycle,
+)
+
 # -----------------------------------------------------
 # Startup
 # -----------------------------------------------------
@@ -72,11 +79,11 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "21.5",
+        "stage": "22.0",
     }
 
 # -----------------------------------------------------
-# Core Intelligence
+# Core APIs
 # -----------------------------------------------------
 @app.post("/alignment/evaluate")
 def evaluate_alignment(payload: Dict[str, Any]):
@@ -107,27 +114,25 @@ def client_snapshot(client_id: str):
 def generate_insights():
     return insight_engine.generate_insights()
 
-# -----------------------------------------------------
-# Continuous Cycle
-# -----------------------------------------------------
 @app.get("/cycle/state")
 def cycle_state():
     return continuous_cycle.get_state()
 
-# -----------------------------------------------------
-# Signals
-# -----------------------------------------------------
 @app.get("/signals/prioritized")
 def prioritized_signals():
     return signal_prioritizer.prioritize()
 
-# -----------------------------------------------------
-# STRATEGIC NARRATIVE (NEW)
-# -----------------------------------------------------
 @app.get("/narrative/briefing")
 def narrative_briefing():
     return narrative_engine.generate_narrative()
 
-@app.get("/narrative/status")
-def narrative_status():
-    return narrative_engine.status()
+# -----------------------------------------------------
+# CONFIDENCE SCORING (NEW)
+# -----------------------------------------------------
+@app.get("/confidence/evaluate")
+def confidence_evaluate():
+    return confidence_engine.evaluate_confidence()
+
+@app.get("/confidence/status")
+def confidence_status():
+    return confidence_engine.status()
