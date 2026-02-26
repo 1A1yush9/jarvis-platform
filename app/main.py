@@ -16,6 +16,7 @@ from core.executive_cognitive_stability import ExecutiveCognitiveStability
 from core.executive_intelligence_convergence import ExecutiveIntelligenceConvergence
 from core.executive_continuity_kernel import ExecutiveContinuityKernel
 from core.executive_strategic_consciousness import ExecutiveStrategicConsciousness
+from core.executive_reality_alignment import ExecutiveRealityAlignment
 
 app = FastAPI(title="Jarvis Executive Intelligence API")
 
@@ -34,13 +35,14 @@ cognitive_stability = ExecutiveCognitiveStability()
 convergence_engine = ExecutiveIntelligenceConvergence()
 continuity_kernel = ExecutiveContinuityKernel()
 strategic_consciousness = ExecutiveStrategicConsciousness()
+reality_alignment = ExecutiveRealityAlignment()
 
 
 @app.get("/")
 def root():
     return {
         "status": "Jarvis LIVE",
-        "stage": "31.0",
+        "stage": "31.5",
         "mode": "Advisory Cognition Only",
     }
 
@@ -141,8 +143,14 @@ def executive_alignment(payload: Dict[str, Any]):
         continuity_result,
     )
 
+    reality_alignment_result = reality_alignment.evaluate_reality_alignment(
+        alignment_result,
+        consciousness_result,
+        foresight_result,
+    )
+
     return {
-        "stage": "31.0",
+        "stage": "31.5",
         "alignment_analysis": alignment_result,
         "strategic_memory": memory_result,
         "executive_intent": intent_result,
@@ -158,4 +166,5 @@ def executive_alignment(payload: Dict[str, Any]):
         "executive_intelligence": convergence_result,
         "executive_continuity": continuity_result,
         "strategic_consciousness": consciousness_result,
+        "reality_alignment": reality_alignment_result,
     }
