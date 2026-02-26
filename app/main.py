@@ -1,6 +1,6 @@
 """
 Jarvis Platform API
-Production Safe — Stage 22.0 Integrated
+Production Safe — Stage 22.5 Integrated
 """
 
 from fastapi import FastAPI
@@ -17,10 +17,11 @@ from core.continuous_intelligence_cycle import ContinuousIntelligenceCycle
 from core.executive_signal_prioritizer import ExecutiveSignalPrioritizer
 from core.strategic_narrative_engine import StrategicNarrativeEngine
 from core.intelligence_confidence_engine import IntelligenceConfidenceEngine
+from core.executive_risk_radar import ExecutiveRiskRadar
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="22.0",
+    version="22.5",
 )
 
 # -----------------------------------------------------
@@ -63,6 +64,12 @@ confidence_engine = IntelligenceConfidenceEngine(
     continuous_cycle,
 )
 
+risk_radar = ExecutiveRiskRadar(
+    predictive_engine,
+    confidence_engine,
+    signal_prioritizer,
+)
+
 # -----------------------------------------------------
 # Startup
 # -----------------------------------------------------
@@ -79,7 +86,7 @@ def root():
         "platform": "Jarvis",
         "status": "LIVE",
         "mode": "advisory_only",
-        "stage": "22.0",
+        "stage": "22.5",
     }
 
 # -----------------------------------------------------
@@ -126,13 +133,17 @@ def prioritized_signals():
 def narrative_briefing():
     return narrative_engine.generate_narrative()
 
-# -----------------------------------------------------
-# CONFIDENCE SCORING (NEW)
-# -----------------------------------------------------
 @app.get("/confidence/evaluate")
 def confidence_evaluate():
     return confidence_engine.evaluate_confidence()
 
-@app.get("/confidence/status")
-def confidence_status():
-    return confidence_engine.status()
+# -----------------------------------------------------
+# EXECUTIVE RISK RADAR (NEW)
+# -----------------------------------------------------
+@app.get("/risk/evaluate")
+def risk_evaluate():
+    return risk_radar.evaluate_risk()
+
+@app.get("/risk/status")
+def risk_status():
+    return risk_radar.status()
