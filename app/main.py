@@ -9,11 +9,12 @@ from app.oversight_api import router as oversight_router
 from app.constitution_api import router as constitution_router
 from app.decision_trace_api import router as decision_trace_router
 from app.simulation_api import router as simulation_router
+from app.forecast_api import router as forecast_router
 
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="42.0",
+    version="43.0",
 )
 
 
@@ -26,14 +27,15 @@ app.include_router(oversight_router)
 app.include_router(constitution_router)
 app.include_router(decision_trace_router)
 app.include_router(simulation_router)
+app.include_router(forecast_router)
 
 
 @app.get("/")
 def root():
     return {
         "system": "Jarvis Platform",
-        "stage": "42.0",
+        "stage": "43.0",
         "mode": "Advisory Cognition Only",
         "status": "LIVE",
-        "simulation": "Strategic Sandbox Active"
+        "forecasting": "Multi-Timeline Engine Active"
     }
