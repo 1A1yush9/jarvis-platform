@@ -6,6 +6,7 @@ from app.adaptive_status import router as adaptive_router
 from app.containment_status import router as containment_router
 from app.activation_status import router as activation_router
 from app.oversight_api import router as oversight_router
+from app.constitution_api import router as constitution_router
 
 
 # ---------------------------------------------------------
@@ -14,12 +15,12 @@ from app.oversight_api import router as oversight_router
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="39.0",
+    version="40.0",
 )
 
 
 # ---------------------------------------------------------
-# Router Registration (ORDER SAFE)
+# Router Registration
 # ---------------------------------------------------------
 
 app.include_router(operational_router)
@@ -28,6 +29,7 @@ app.include_router(adaptive_router)
 app.include_router(containment_router)
 app.include_router(activation_router)
 app.include_router(oversight_router)
+app.include_router(constitution_router)
 
 
 # ---------------------------------------------------------
@@ -38,7 +40,8 @@ app.include_router(oversight_router)
 def root():
     return {
         "system": "Jarvis Platform",
-        "stage": "39.0",
+        "stage": "40.0",
         "mode": "Advisory Cognition Only",
-        "status": "LIVE"
+        "status": "LIVE",
+        "governance": "Constitutional Layer Active"
     }
