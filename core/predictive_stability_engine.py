@@ -1,98 +1,104 @@
 """
-Jarvis Platform — Stage 18.5
-Predictive Strategic Stability Engine
+Jarvis Platform — Stage 56.0
+Predictive Stability & Pre-Failure Anticipation Engine
 
-Purpose:
-Forecast future strategic stability using historical alignment data.
+Governance-Scoped Predictive Supervisor
+(Non-executing, advisory-only)
 
-SAFE MODE:
-Advisory only.
-Deterministic forecasting.
-No execution authority.
+IMPORTANT:
+This engine DOES NOT overlap with predictive_engine.py.
+It evaluates governance stability only.
 """
 
-from typing import Dict, Any, List
 from datetime import datetime
-import json
-import os
+from typing import Dict, Any, List
 
 
 class PredictiveStabilityEngine:
-    def __init__(self, memory_path: str = "memory_alignment.json"):
-        self.engine_name = "Predictive Strategic Stability Engine"
-        self.version = "18.5"
-        self.mode = "advisory_only"
-        self.memory_path = memory_path
+    """
+    Predicts governance instability trends.
+    Passive supervisory component.
+    """
 
-    # -----------------------------------------------------
-    # Memory Loader
-    # -----------------------------------------------------
-    def _load_memory(self) -> List[Dict[str, Any]]:
-        if not os.path.exists(self.memory_path):
-            return []
+    HISTORY_LIMIT = 40
+    WARNING_THRESHOLD = 0.6
 
-        with open(self.memory_path, "r") as f:
-            return json.load(f)
+    def __init__(self, decision_trace=None):
+        self.decision_trace = decision_trace
+        self.signal_history: List[int] = []
+        self.state = "STABLE"
 
-    # -----------------------------------------------------
-    # Forecast Stability
-    # -----------------------------------------------------
-    def forecast(self) -> Dict[str, Any]:
+    # --------------------------------------------------
 
-        memory = self._load_memory()
+    def evaluate(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Governance-only prediction layer.
+        """
 
-        if len(memory) < 3:
-            return {
-                "engine": self.engine_name,
-                "version": self.version,
-                "message": "Insufficient historical data for prediction.",
-                "mode": self.mode,
-            }
+        score = self._compute_signal_score(payload)
 
-        scores = [m.get("alignment_score", 0) for m in memory]
+        self.signal_history.append(score)
 
-        # recent window
-        recent = scores[-5:] if len(scores) >= 5 else scores
+        if len(self.signal_history) > self.HISTORY_LIMIT:
+            self.signal_history.pop(0)
 
-        trend_velocity = recent[-1] - recent[0]
+        trend = sum(self.signal_history) / len(self.signal_history)
 
-        instability_risk = "low"
-        advisory = []
+        self.state = (
+            "PRE_FAILURE_WARNING"
+            if trend >= self.WARNING_THRESHOLD
+            else "STABLE"
+        )
 
-        if trend_velocity < -0.15:
-            instability_risk = "medium"
-            advisory.append(
-                "Alignment declining. Monitor executive decisions."
-            )
-
-        if trend_velocity < -0.30:
-            instability_risk = "high"
-            advisory.append(
-                "Rapid strategic degradation predicted."
-            )
-
-        if instability_risk == "high":
-            advisory.append(
-                "Executive strategic reassessment recommended."
-            )
-
-        return {
-            "engine": self.engine_name,
-            "version": self.version,
+        report = {
             "timestamp": datetime.utcnow().isoformat(),
-            "trend_velocity": round(trend_velocity, 3),
-            "predicted_instability_risk": instability_risk,
-            "advisory": advisory,
-            "mode": self.mode,
+            "trend_score": round(trend, 3),
+            "prediction_state": self.state,
+            "scope": "GOVERNANCE_STABILITY",
         }
 
-    # -----------------------------------------------------
-    # Status
-    # -----------------------------------------------------
-    def status(self) -> Dict[str, Any]:
-        return {
-            "engine": self.engine_name,
-            "version": self.version,
-            "status": "operational",
-            "mode": self.mode,
-        }
+        self._record(report)
+
+        payload["predictive_stability"] = report
+        return payload
+
+    # --------------------------------------------------
+
+    def _compute_signal_score(self, payload: Dict[str, Any]) -> int:
+        score = 0
+
+        # resilience degradation
+        if payload.get("resilience"):
+            score += 1
+
+        # pressure regulation active
+        pressure = payload.get("cognitive_pressure", {})
+        if pressure.get("regulated"):
+            score += 1
+
+        # governance inconsistency
+        meta = payload.get("meta_governance", {})
+        if meta.get("meta_governance_state") == "INCONSISTENT":
+            score += 1
+
+        return score
+
+    # --------------------------------------------------
+
+    def _record(self, report: Dict[str, Any]) -> None:
+        if self.decision_trace:
+            self.decision_trace.record({
+                "timestamp": report["timestamp"],
+                "event": "PREDICTIVE_STABILITY_CHECK",
+                "detail": report["prediction_state"],
+                "layer": "PredictiveStabilityEngine",
+            })
+
+
+# Stable explicit export (prevents loader ambiguity)
+predictive_stability_engine = PredictiveStabilityEngine
+
+__all__ = [
+    "PredictiveStabilityEngine",
+    "predictive_stability_engine",
+]
