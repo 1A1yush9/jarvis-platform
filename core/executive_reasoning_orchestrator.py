@@ -1,15 +1,13 @@
 """
 Executive Reasoning Orchestrator
-(Stage 51.0 Integrated)
+(Stage 52.0 Integrated)
 """
 
 from typing import Dict, Any
 
-from core.executive_autonomy_boundary import (
-    ExecutiveAutonomyBoundary,
-)
-
+from core.executive_autonomy_boundary import ExecutiveAutonomyBoundary
 from core.governance_self_audit import GovernanceSelfAudit
+from core.cognitive_integrity_monitor import CognitiveIntegrityMonitor
 
 
 class ExecutiveReasoningOrchestrator:
@@ -25,16 +23,21 @@ class ExecutiveReasoningOrchestrator:
         self.consensus = consensus_engine
         self.decision_trace = decision_trace
 
-        # Stage-50 containment
+        # Stage-50
         self.autonomy_boundary = ExecutiveAutonomyBoundary(
             decision_trace=self.decision_trace
         )
 
-        # Stage-51 governance audit
+        # Stage-51
         self.self_audit = GovernanceSelfAudit(
             autonomy_boundary=self.autonomy_boundary,
             decision_trace=self.decision_trace,
             stability_regulator=stability_regulator,
+        )
+
+        # Stage-52
+        self.integrity_monitor = CognitiveIntegrityMonitor(
+            decision_trace=self.decision_trace
         )
 
     # --------------------------------------------------
@@ -45,15 +48,17 @@ class ExecutiveReasoningOrchestrator:
 
         consensus_output = self.consensus.evaluate(reasoning_output)
 
-        # Stage-50 containment
         safe_output = self.autonomy_boundary.validate_intent(
             consensus_output
         )
 
-        # Stage-51 continuous verification
         audited_output = self.self_audit.run_audit(safe_output)
 
-        return audited_output
+        integrity_checked_output = self.integrity_monitor.evaluate(
+            audited_output
+        )
+
+        return integrity_checked_output
 
 
 # Backward compatibility export
