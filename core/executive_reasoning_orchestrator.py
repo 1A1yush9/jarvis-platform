@@ -1,10 +1,11 @@
 """
 Executive Reasoning Orchestrator
-(Stage 54.0 Integrated)
+(Stage 55.0 Integrated)
 """
 
 from typing import Dict, Any
 
+from core.adaptive_load_regulator import AdaptiveLoadRegulator
 from core.executive_autonomy_boundary import ExecutiveAutonomyBoundary
 from core.governance_self_audit import GovernanceSelfAudit
 from core.cognitive_integrity_monitor import CognitiveIntegrityMonitor
@@ -25,7 +26,12 @@ class ExecutiveReasoningOrchestrator:
         self.consensus = consensus_engine
         self.decision_trace = decision_trace
 
-        # Stage-54 resilience
+        # Stage-55 Load Regulation
+        self.load_regulator = AdaptiveLoadRegulator(
+            decision_trace=self.decision_trace
+        )
+
+        # Stage-54 Resilience
         self.resilience = ConstitutionalResilience(
             decision_trace=self.decision_trace
         )
@@ -56,7 +62,9 @@ class ExecutiveReasoningOrchestrator:
 
     def process(self, signal: Dict[str, Any]) -> Dict[str, Any]:
 
-        reasoning_output = self.kernel.process(signal)
+        regulated_signal = self.load_regulator.regulate(signal)
+
+        reasoning_output = self.kernel.process(regulated_signal)
 
         consensus_output = self.consensus.evaluate(reasoning_output)
 
