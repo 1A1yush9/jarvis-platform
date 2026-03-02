@@ -11,10 +11,11 @@ def system_status():
         "status": "LIVE",
         "mode": SYSTEM_MODE,
         "execution_authority": False,
+        "constitutional_resilience": True,
         "autonomy_boundary": True,
         "governance_self_audit": True,
         "cognitive_integrity_monitor": True,
         "meta_governance_sentinel": True,
-        "stage": "53.0",
+        "stage": "54.0",
         "timestamp": datetime.utcnow().isoformat(),
     }

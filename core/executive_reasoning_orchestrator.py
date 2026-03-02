@@ -1,6 +1,6 @@
 """
 Executive Reasoning Orchestrator
-(Stage 53.0 Integrated)
+(Stage 54.0 Integrated)
 """
 
 from typing import Dict, Any
@@ -9,6 +9,7 @@ from core.executive_autonomy_boundary import ExecutiveAutonomyBoundary
 from core.governance_self_audit import GovernanceSelfAudit
 from core.cognitive_integrity_monitor import CognitiveIntegrityMonitor
 from core.meta_governance_sentinel import MetaGovernanceSentinel
+from core.constitutional_resilience import ConstitutionalResilience
 
 
 class ExecutiveReasoningOrchestrator:
@@ -23,6 +24,11 @@ class ExecutiveReasoningOrchestrator:
         self.kernel = intelligence_kernel
         self.consensus = consensus_engine
         self.decision_trace = decision_trace
+
+        # Stage-54 resilience
+        self.resilience = ConstitutionalResilience(
+            decision_trace=self.decision_trace
+        )
 
         # Stage-50
         self.autonomy_boundary = ExecutiveAutonomyBoundary(
@@ -58,14 +64,22 @@ class ExecutiveReasoningOrchestrator:
             consensus_output
         )
 
-        audited_output = self.self_audit.run_audit(safe_output)
-
-        integrity_checked_output = self.integrity_monitor.evaluate(
-            audited_output
+        audited_output = self.resilience.protect(
+            "governance_self_audit",
+            lambda: self.self_audit.run_audit(safe_output),
+            safe_output,
         )
 
-        supervised_output = self.meta_sentinel.supervise(
-            integrity_checked_output
+        integrity_output = self.resilience.protect(
+            "cognitive_integrity_monitor",
+            lambda: self.integrity_monitor.evaluate(audited_output),
+            audited_output,
+        )
+
+        supervised_output = self.resilience.protect(
+            "meta_governance_sentinel",
+            lambda: self.meta_sentinel.supervise(integrity_output),
+            integrity_output,
         )
 
         return supervised_output
