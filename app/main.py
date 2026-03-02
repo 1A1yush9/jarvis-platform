@@ -15,11 +15,12 @@ from app.intent_alignment_api import router as intent_router
 from app.stability_api import router as stability_router
 from app.memory_api import router as memory_router
 from app.awareness_api import router as awareness_router
+from app.orchestrator_api import router as orchestrator_router
 
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="48.0",
+    version="49.0",
 )
 
 
@@ -38,14 +39,15 @@ app.include_router(intent_router)
 app.include_router(stability_router)
 app.include_router(memory_router)
 app.include_router(awareness_router)
+app.include_router(orchestrator_router)
 
 
 @app.get("/")
 def root():
     return {
         "system": "Jarvis Platform",
-        "stage": "48.0",
+        "stage": "49.0",
         "mode": "Advisory Cognition Only",
         "status": "LIVE",
-        "awareness_graph": "Active"
+        "orchestrator": "Executive Reasoning Active"
     }
