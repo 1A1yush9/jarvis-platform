@@ -14,6 +14,7 @@ def system_status():
         "autonomy_boundary": True,
         "governance_self_audit": True,
         "cognitive_integrity_monitor": True,
-        "stage": "52.0",
+        "meta_governance_sentinel": True,
+        "stage": "53.0",
         "timestamp": datetime.utcnow().isoformat(),
     }

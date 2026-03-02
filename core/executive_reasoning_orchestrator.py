@@ -1,6 +1,6 @@
 """
 Executive Reasoning Orchestrator
-(Stage 52.0 Integrated)
+(Stage 53.0 Integrated)
 """
 
 from typing import Dict, Any
@@ -8,6 +8,7 @@ from typing import Dict, Any
 from core.executive_autonomy_boundary import ExecutiveAutonomyBoundary
 from core.governance_self_audit import GovernanceSelfAudit
 from core.cognitive_integrity_monitor import CognitiveIntegrityMonitor
+from core.meta_governance_sentinel import MetaGovernanceSentinel
 
 
 class ExecutiveReasoningOrchestrator:
@@ -40,6 +41,11 @@ class ExecutiveReasoningOrchestrator:
             decision_trace=self.decision_trace
         )
 
+        # Stage-53
+        self.meta_sentinel = MetaGovernanceSentinel(
+            decision_trace=self.decision_trace
+        )
+
     # --------------------------------------------------
 
     def process(self, signal: Dict[str, Any]) -> Dict[str, Any]:
@@ -58,7 +64,11 @@ class ExecutiveReasoningOrchestrator:
             audited_output
         )
 
-        return integrity_checked_output
+        supervised_output = self.meta_sentinel.supervise(
+            integrity_checked_output
+        )
+
+        return supervised_output
 
 
 # Backward compatibility export
