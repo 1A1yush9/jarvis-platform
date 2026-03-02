@@ -1,105 +1,48 @@
 """
-Stage-49.0 — Executive Reasoning Orchestrator
-
-Meta-coordination layer governing advisory reasoning flow
-across all intelligence subsystems.
-
-This module NEVER executes actions.
-It aggregates and coordinates advisory cognition only.
+Executive Reasoning Orchestrator
+Meta-Coordination Layer
+(Stage 50.0 integrated)
 """
 
-from datetime import datetime
-from typing import Dict, Any, List
-import uuid
+from typing import Dict, Any
 
-
-class OrchestrationCycle:
-
-    def __init__(self, inputs: Dict[str, Any]):
-        self.id = str(uuid.uuid4())
-        self.inputs = inputs
-        self.created_at = datetime.utcnow().isoformat()
-        self.summary = {}
-        self.status = "ADVISORY_ORCHESTRATION"
+from core.executive_autonomy_boundary import (
+    ExecutiveAutonomyBoundary,
+    AutonomyViolation
+)
 
 
 class ExecutiveReasoningOrchestrator:
 
-    def __init__(self):
-        self.cycles: Dict[str, OrchestrationCycle] = {}
+    def __init__(
+        self,
+        intelligence_kernel,
+        consensus_engine,
+        decision_trace
+    ):
+        self.kernel = intelligence_kernel
+        self.consensus = consensus_engine
+        self.decision_trace = decision_trace
 
-    # ---------------------------------------------------------
-    # Start Orchestration Cycle
-    # ---------------------------------------------------------
+        # NEW — Final containment authority
+        self.autonomy_boundary = ExecutiveAutonomyBoundary(
+            decision_trace=self.decision_trace
+        )
 
-    def start_cycle(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    # --------------------------------------------------
 
-        cycle = OrchestrationCycle(inputs)
-        self.cycles[cycle.id] = cycle
+    def process(self, signal: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Full cognitive lifecycle.
+        """
 
-        cycle.summary = self._build_summary(inputs)
+        reasoning_output = self.kernel.process(signal)
 
-        return {
-            "cycle_id": cycle.id,
-            "status": cycle.status,
-            "summary": cycle.summary,
-        }
+        consensus_output = self.consensus.evaluate(reasoning_output)
 
-    # ---------------------------------------------------------
-    # Build Advisory Summary
-    # ---------------------------------------------------------
+        # FINAL STEP — CONTAINMENT VALIDATION
+        safe_output = self.autonomy_boundary.validate_intent(
+            consensus_output
+        )
 
-    def _build_summary(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-
-        active_systems: List[str] = []
-
-        for key, value in inputs.items():
-            if value:
-                active_systems.append(key)
-
-        complexity_score = min(1.0, 0.4 + (0.05 * len(active_systems)))
-
-        if complexity_score < 0.6:
-            posture = "CONTROLLED"
-        elif complexity_score < 0.8:
-            posture = "COMPLEX"
-        else:
-            posture = "HIGH_COMPLEXITY"
-
-        return {
-            "active_systems": active_systems,
-            "complexity_score": complexity_score,
-            "advisory_posture": posture,
-            "generated_at": datetime.utcnow().isoformat(),
-        }
-
-    # ---------------------------------------------------------
-    # Retrieve Cycle
-    # ---------------------------------------------------------
-
-    def get_cycle(self, cycle_id: str):
-
-        cycle = self.cycles.get(cycle_id)
-        if not cycle:
-            return {"error": "Cycle not found"}
-
-        return {
-            "cycle_id": cycle.id,
-            "inputs": cycle.inputs,
-            "summary": cycle.summary,
-            "status": cycle.status,
-        }
-
-    # ---------------------------------------------------------
-    # Overview
-    # ---------------------------------------------------------
-
-    def overview(self):
-        return {
-            "total_cycles": len(self.cycles),
-            "mode": "META_COORDINATION_ACTIVE",
-        }
-
-
-# Singleton instance
-executive_reasoning_orchestrator = ExecutiveReasoningOrchestrator()
+        return safe_output
