@@ -14,11 +14,12 @@ from app.consensus_api import router as consensus_router
 from app.intent_alignment_api import router as intent_router
 from app.stability_api import router as stability_router
 from app.memory_api import router as memory_router
+from app.awareness_api import router as awareness_router
 
 
 app = FastAPI(
     title="Jarvis Intelligence Platform",
-    version="47.0",
+    version="48.0",
 )
 
 
@@ -36,14 +37,15 @@ app.include_router(consensus_router)
 app.include_router(intent_router)
 app.include_router(stability_router)
 app.include_router(memory_router)
+app.include_router(awareness_router)
 
 
 @app.get("/")
 def root():
     return {
         "system": "Jarvis Platform",
-        "stage": "47.0",
+        "stage": "48.0",
         "mode": "Advisory Cognition Only",
         "status": "LIVE",
-        "memory_layer": "Executive Memory Active"
+        "awareness_graph": "Active"
     }
