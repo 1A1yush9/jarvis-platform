@@ -9,23 +9,26 @@ from governance.consensus.global_consensus_stabilizer import GlobalConsensusStab
 from governance.security.byzantine_anomaly_detector import ByzantineAnomalyDetector
 from governance.isolation.governance_fault_isolator import GovernanceFaultIsolator
 from governance.healing.governance_self_healing_orchestrator import GovernanceSelfHealingOrchestrator
+from governance.forecasting.governance_predictive_forecaster import GovernancePredictiveForecaster
 
 
 class DeterministicReplicationEngine:
     """
     Deterministic Governance Replication Engine
 
-    Integrated Stages
+    Integrated Governance Stages
+
         Stage-114  Deterministic Replication
         Stage-115  Global Consensus Stabilizer
         Stage-116  Byzantine Anomaly Detector
         Stage-117  Governance Fault Domain Isolation
         Stage-118  Governance Self-Healing Orchestrator
+        Stage-119  Governance Predictive Risk Forecaster
 
-    Governance Layer Rules
+    Governance Constraints
 
-    - Read-only
-    - Deterministic
+    - Deterministic execution
+    - Read-only governance layer
     - No mutation authority
     - No runtime execution authority
     """
@@ -34,19 +37,22 @@ class DeterministicReplicationEngine:
 
     def __init__(self):
 
+        # Core replication components
         self.registry = NodePeerRegistry()
         self.snapshot = LedgerStateSnapshot()
         self.consensus = ReplicationConsensus()
 
+        # Governance analysis layers
         self.stabilizer = GlobalConsensusStabilizer()
         self.anomaly_detector = ByzantineAnomalyDetector()
         self.fault_isolator = GovernanceFaultIsolator()
         self.self_healer = GovernanceSelfHealingOrchestrator()
+        self.forecaster = GovernancePredictiveForecaster()
 
     def execute(self) -> Dict:
 
         # --------------------------------------------------
-        # 1. Local governance snapshot
+        # 1. Compute local governance snapshot
         # --------------------------------------------------
 
         local_snapshot = self.snapshot.snapshot_payload()
@@ -93,7 +99,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 7. Governance self-healing
+        # 7. Governance self-healing evaluation
         # --------------------------------------------------
 
         healing_report = self.self_healer.evaluate(
@@ -102,7 +108,17 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 8. Deterministic governance output
+        # 8. Predictive governance risk forecasting
+        # --------------------------------------------------
+
+        forecast_report = self.forecaster.evaluate(
+            replication_result,
+            security_report,
+            fault_domain_report
+        )
+
+        # --------------------------------------------------
+        # 9. Deterministic governance report
         # --------------------------------------------------
 
         return {
@@ -112,7 +128,8 @@ class DeterministicReplicationEngine:
             "cluster_stability": stability,
             "security_analysis": security_report,
             "fault_domain_status": fault_domain_report,
-            "self_healing_status": healing_report
+            "self_healing_status": healing_report,
+            "predictive_risk_forecast": forecast_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
