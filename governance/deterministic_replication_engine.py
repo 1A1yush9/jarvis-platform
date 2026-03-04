@@ -7,14 +7,6 @@ Stage Reference: 114.0+
 Purpose
 -------
 Replicates governance ledger entries deterministically across nodes.
-
-Key Guarantees
---------------
-• Deterministic ordering
-• Cryptographic verification
-• Append-only ledger replication
-• No execution authority
-• No mutation authority
 """
 
 import hashlib
@@ -63,11 +55,9 @@ class DeterministicReplicationEngine:
         previous = None
 
         for entry in self.replication_log:
-
             if previous:
                 if entry["timestamp"] < previous["timestamp"]:
                     return False
-
             previous = entry
 
         return True
