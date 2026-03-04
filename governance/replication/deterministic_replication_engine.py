@@ -11,6 +11,7 @@ from governance.isolation.governance_fault_isolator import GovernanceFaultIsolat
 from governance.healing.governance_self_healing_orchestrator import GovernanceSelfHealingOrchestrator
 from governance.forecasting.governance_predictive_forecaster import GovernancePredictiveForecaster
 from governance.stabilization.governance_autonomic_stabilizer import GovernanceAutonomicStabilizer
+from governance.oversight.governance_strategic_oversight_engine import GovernanceStrategicOversightEngine
 
 
 class DeterministicReplicationEngine:
@@ -26,6 +27,7 @@ class DeterministicReplicationEngine:
         Stage-118  Governance Self-Healing Orchestrator
         Stage-119  Governance Predictive Risk Forecaster
         Stage-120  Governance Autonomic Stabilization Layer
+        Stage-121  Governance Strategic Oversight Engine
 
     Governance Constraints
 
@@ -51,11 +53,12 @@ class DeterministicReplicationEngine:
         self.self_healer = GovernanceSelfHealingOrchestrator()
         self.forecaster = GovernancePredictiveForecaster()
         self.autonomic_stabilizer = GovernanceAutonomicStabilizer()
+        self.oversight_engine = GovernanceStrategicOversightEngine()
 
     def execute(self) -> Dict:
 
         # --------------------------------------------------
-        # 1. Compute local governance snapshot
+        # 1. Local governance snapshot
         # --------------------------------------------------
 
         local_snapshot = self.snapshot.snapshot_payload()
@@ -131,7 +134,16 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 10. Deterministic governance report
+        # 10. Strategic governance oversight
+        # --------------------------------------------------
+
+        oversight_report = self.oversight_engine.evaluate(
+            stability,
+            forecast_report
+        )
+
+        # --------------------------------------------------
+        # 11. Deterministic governance report
         # --------------------------------------------------
 
         return {
@@ -143,7 +155,8 @@ class DeterministicReplicationEngine:
             "fault_domain_status": fault_domain_report,
             "self_healing_status": healing_report,
             "predictive_risk_forecast": forecast_report,
-            "autonomic_stabilization": stabilization_report
+            "autonomic_stabilization": stabilization_report,
+            "strategic_governance_oversight": oversight_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
