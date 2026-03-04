@@ -12,6 +12,7 @@ from governance.healing.governance_self_healing_orchestrator import GovernanceSe
 from governance.forecasting.governance_predictive_forecaster import GovernancePredictiveForecaster
 from governance.stabilization.governance_autonomic_stabilizer import GovernanceAutonomicStabilizer
 from governance.oversight.governance_strategic_oversight_engine import GovernanceStrategicOversightEngine
+from governance.meta_resilience.governance_meta_resilience_engine import GovernanceMetaResilienceEngine
 
 
 class DeterministicReplicationEngine:
@@ -28,6 +29,7 @@ class DeterministicReplicationEngine:
         Stage-119  Governance Predictive Risk Forecaster
         Stage-120  Governance Autonomic Stabilization Layer
         Stage-121  Governance Strategic Oversight Engine
+        Stage-122  Governance Meta-Resilience Layer
 
     Governance Constraints
 
@@ -54,6 +56,7 @@ class DeterministicReplicationEngine:
         self.forecaster = GovernancePredictiveForecaster()
         self.autonomic_stabilizer = GovernanceAutonomicStabilizer()
         self.oversight_engine = GovernanceStrategicOversightEngine()
+        self.meta_resilience_engine = GovernanceMetaResilienceEngine()
 
     def execute(self) -> Dict:
 
@@ -143,7 +146,18 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 11. Deterministic governance report
+        # 11. Governance meta-resilience diagnostics
+        # --------------------------------------------------
+
+        meta_resilience_report = self.meta_resilience_engine.evaluate(
+            stability,
+            security_report,
+            forecast_report,
+            oversight_report
+        )
+
+        # --------------------------------------------------
+        # 12. Deterministic governance report
         # --------------------------------------------------
 
         return {
@@ -156,7 +170,8 @@ class DeterministicReplicationEngine:
             "self_healing_status": healing_report,
             "predictive_risk_forecast": forecast_report,
             "autonomic_stabilization": stabilization_report,
-            "strategic_governance_oversight": oversight_report
+            "strategic_governance_oversight": oversight_report,
+            "meta_resilience_diagnostics": meta_resilience_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
