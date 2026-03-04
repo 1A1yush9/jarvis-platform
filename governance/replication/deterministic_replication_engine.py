@@ -10,6 +10,7 @@ from governance.security.byzantine_anomaly_detector import ByzantineAnomalyDetec
 from governance.isolation.governance_fault_isolator import GovernanceFaultIsolator
 from governance.healing.governance_self_healing_orchestrator import GovernanceSelfHealingOrchestrator
 from governance.forecasting.governance_predictive_forecaster import GovernancePredictiveForecaster
+from governance.stabilization.governance_autonomic_stabilizer import GovernanceAutonomicStabilizer
 
 
 class DeterministicReplicationEngine:
@@ -24,6 +25,7 @@ class DeterministicReplicationEngine:
         Stage-117  Governance Fault Domain Isolation
         Stage-118  Governance Self-Healing Orchestrator
         Stage-119  Governance Predictive Risk Forecaster
+        Stage-120  Governance Autonomic Stabilization Layer
 
     Governance Constraints
 
@@ -43,11 +45,12 @@ class DeterministicReplicationEngine:
         self.consensus = ReplicationConsensus()
 
         # Governance analysis layers
-        self.stabilizer = GlobalConsensusStabilizer()
+        self.cluster_stabilizer = GlobalConsensusStabilizer()
         self.anomaly_detector = ByzantineAnomalyDetector()
         self.fault_isolator = GovernanceFaultIsolator()
         self.self_healer = GovernanceSelfHealingOrchestrator()
         self.forecaster = GovernancePredictiveForecaster()
+        self.autonomic_stabilizer = GovernanceAutonomicStabilizer()
 
     def execute(self) -> Dict:
 
@@ -76,7 +79,7 @@ class DeterministicReplicationEngine:
         # 4. Cluster stability evaluation
         # --------------------------------------------------
 
-        stability = self.stabilizer.evaluate(
+        stability = self.cluster_stabilizer.evaluate(
             local_snapshot,
             peer_snapshots,
             replication_result
@@ -108,7 +111,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 8. Predictive governance risk forecasting
+        # 8. Predictive governance risk forecast
         # --------------------------------------------------
 
         forecast_report = self.forecaster.evaluate(
@@ -118,7 +121,17 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 9. Deterministic governance report
+        # 9. Autonomic stabilization recommendation
+        # --------------------------------------------------
+
+        stabilization_report = self.autonomic_stabilizer.evaluate(
+            forecast_report,
+            stability,
+            fault_domain_report
+        )
+
+        # --------------------------------------------------
+        # 10. Deterministic governance report
         # --------------------------------------------------
 
         return {
@@ -129,7 +142,8 @@ class DeterministicReplicationEngine:
             "security_analysis": security_report,
             "fault_domain_status": fault_domain_report,
             "self_healing_status": healing_report,
-            "predictive_risk_forecast": forecast_report
+            "predictive_risk_forecast": forecast_report,
+            "autonomic_stabilization": stabilization_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
