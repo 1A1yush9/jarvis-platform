@@ -28,14 +28,12 @@ class DeterministicReplicationEngine:
     MODULE = "deterministic_replication_engine"
 
     def __init__(self, node_id: str):
-
         self.node_id = node_id
         self.replication_log: List[Dict[str, Any]] = []
 
     # -------------------------------------------------------------
 
     def _hash(self, payload: Dict[str, Any]) -> str:
-
         encoded = json.dumps(payload, sort_keys=True).encode()
         return hashlib.sha256(encoded).hexdigest()
 
@@ -77,5 +75,4 @@ class DeterministicReplicationEngine:
     # -------------------------------------------------------------
 
     def export_replication_log(self) -> List[Dict[str, Any]]:
-
         return list(self.replication_log)
