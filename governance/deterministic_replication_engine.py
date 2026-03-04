@@ -63,9 +63,11 @@ class DeterministicReplicationEngine:
         previous = None
 
         for entry in self.replication_log:
+
             if previous:
                 if entry["timestamp"] < previous["timestamp"]:
                     return False
+
             previous = entry
 
         return True
