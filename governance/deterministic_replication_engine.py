@@ -40,9 +40,6 @@ class DeterministicReplicationEngine:
     # -------------------------------------------------------------
 
     def replicate(self, ledger_entry: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Deterministically replicate a governance ledger entry.
-        """
 
         replication_record = {
             "module": self.MODULE,
@@ -62,15 +59,12 @@ class DeterministicReplicationEngine:
     # -------------------------------------------------------------
 
     def verify_replication(self) -> bool:
-        """
-        Deterministic replication verification.
-        """
 
         previous = None
 
         for entry in self.replication_log:
-            if previous:
 
+            if previous:
                 if entry["timestamp"] < previous["timestamp"]:
                     return False
 
