@@ -4,12 +4,14 @@ from typing import Dict
 from .node_peer_registry import NodePeerRegistry
 from .ledger_state_snapshot import LedgerStateSnapshot
 from .replication_consensus import ReplicationConsensus
+from governance.consensus.global_consensus_stabilizer import GlobalConsensusStabilizer
 
 
 class DeterministicReplicationEngine:
     """
-    Stage-114.0
+    Stage-114 / 115
     Deterministic Multi-Node Governance Replication
+    with Global Consensus Stabilization
 
     Responsibilities:
 
@@ -17,7 +19,7 @@ class DeterministicReplicationEngine:
     - Query peer nodes
     - Compare deterministic hashes
     - Detect divergence
-    - Emit telemetry signals
+    - Evaluate cluster stability
 
     No authority to mutate system state.
     """
@@ -28,19 +30,35 @@ class DeterministicReplicationEngine:
         self.registry = NodePeerRegistry()
         self.snapshot = LedgerStateSnapshot()
         self.consensus = ReplicationConsensus()
+        self.stabilizer = GlobalConsensusStabilizer()
 
     def execute(self) -> dict:
 
+        # 1️⃣ compute local snapshot
         local_snapshot = self.snapshot.snapshot_payload()
 
+        # 2️⃣ collect peer snapshots
         peer_snapshots = self._collect_peer_snapshots()
 
-        result = self.consensus.evaluate(local_snapshot, peer_snapshots)
+        # 3️⃣ run replication verification
+        replication_result = self.consensus.evaluate(
+            local_snapshot,
+            peer_snapshots
+        )
 
+        # 4️⃣ evaluate cluster stability
+        stability = self.stabilizer.evaluate(
+            local_snapshot,
+            peer_snapshots,
+            replication_result
+        )
+
+        # 5️⃣ deterministic output
         return {
             "local_snapshot": local_snapshot,
             "peer_count": len(peer_snapshots),
-            "replication_result": result,
+            "replication_result": replication_result,
+            "cluster_stability": stability,
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
