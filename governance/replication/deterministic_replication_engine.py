@@ -8,26 +8,19 @@ from .replication_consensus import ReplicationConsensus
 from governance.consensus.global_consensus_stabilizer import GlobalConsensusStabilizer
 from governance.security.byzantine_anomaly_detector import ByzantineAnomalyDetector
 from governance.isolation.governance_fault_isolator import GovernanceFaultIsolator
+from governance.healing.governance_self_healing_orchestrator import GovernanceSelfHealingOrchestrator
 
 
 class DeterministicReplicationEngine:
     """
     Deterministic Governance Replication Engine
 
-    Integrated Stages:
+    Integrated Stages
         Stage-114  Deterministic Replication
         Stage-115  Global Consensus Stabilizer
         Stage-116  Byzantine Anomaly Detector
         Stage-117  Governance Fault Domain Isolation
-
-    Responsibilities
-
-    - Compute local governance snapshot
-    - Collect peer snapshots
-    - Verify replication consensus
-    - Evaluate cluster stability
-    - Detect Byzantine anomalies
-    - Isolate faulty governance nodes
+        Stage-118  Governance Self-Healing Orchestrator
 
     Governance Layer Rules
 
@@ -48,6 +41,7 @@ class DeterministicReplicationEngine:
         self.stabilizer = GlobalConsensusStabilizer()
         self.anomaly_detector = ByzantineAnomalyDetector()
         self.fault_isolator = GovernanceFaultIsolator()
+        self.self_healer = GovernanceSelfHealingOrchestrator()
 
     def execute(self) -> Dict:
 
@@ -99,7 +93,16 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 7. Deterministic governance output
+        # 7. Governance self-healing
+        # --------------------------------------------------
+
+        healing_report = self.self_healer.evaluate(
+            security_report,
+            fault_domain_report
+        )
+
+        # --------------------------------------------------
+        # 8. Deterministic governance output
         # --------------------------------------------------
 
         return {
@@ -108,7 +111,8 @@ class DeterministicReplicationEngine:
             "replication_result": replication_result,
             "cluster_stability": stability,
             "security_analysis": security_report,
-            "fault_domain_status": fault_domain_report
+            "fault_domain_status": fault_domain_report,
+            "self_healing_status": healing_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
