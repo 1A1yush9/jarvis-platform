@@ -47,7 +47,7 @@ class DeterministicReplicationEngine:
             "timestamp": int(time.time()),
             "ledger_hash": self._hash(ledger_entry),
             "ledger_stage": ledger_entry.get("stage"),
-            "ledger_module": ledger_entry.get("module"),
+            "ledger_module": ledger_entry.get("module")
         }
 
         replication_record["replication_hash"] = self._hash(replication_record)
