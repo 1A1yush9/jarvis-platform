@@ -13,6 +13,7 @@ from governance.forecasting.governance_predictive_forecaster import GovernancePr
 from governance.stabilization.governance_autonomic_stabilizer import GovernanceAutonomicStabilizer
 from governance.oversight.governance_strategic_oversight_engine import GovernanceStrategicOversightEngine
 from governance.meta_resilience.governance_meta_resilience_engine import GovernanceMetaResilienceEngine
+from governance.evolution.governance_adaptive_evolution_engine import GovernanceAdaptiveEvolutionEngine
 
 
 class DeterministicReplicationEngine:
@@ -30,6 +31,7 @@ class DeterministicReplicationEngine:
         Stage-120  Governance Autonomic Stabilization Layer
         Stage-121  Governance Strategic Oversight Engine
         Stage-122  Governance Meta-Resilience Layer
+        Stage-123  Governance Adaptive Evolution Engine
 
     Governance Constraints
 
@@ -57,11 +59,12 @@ class DeterministicReplicationEngine:
         self.autonomic_stabilizer = GovernanceAutonomicStabilizer()
         self.oversight_engine = GovernanceStrategicOversightEngine()
         self.meta_resilience_engine = GovernanceMetaResilienceEngine()
+        self.evolution_engine = GovernanceAdaptiveEvolutionEngine()
 
     def execute(self) -> Dict:
 
         # --------------------------------------------------
-        # 1. Local governance snapshot
+        # 1. Compute local governance snapshot
         # --------------------------------------------------
 
         local_snapshot = self.snapshot.snapshot_payload()
@@ -146,7 +149,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 11. Governance meta-resilience diagnostics
+        # 11. Meta-resilience diagnostics
         # --------------------------------------------------
 
         meta_resilience_report = self.meta_resilience_engine.evaluate(
@@ -157,7 +160,17 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 12. Deterministic governance report
+        # 12. Adaptive governance evolution
+        # --------------------------------------------------
+
+        evolution_report = self.evolution_engine.evaluate(
+            meta_resilience_report,
+            forecast_report,
+            oversight_report
+        )
+
+        # --------------------------------------------------
+        # 13. Deterministic governance output
         # --------------------------------------------------
 
         return {
@@ -171,13 +184,13 @@ class DeterministicReplicationEngine:
             "predictive_risk_forecast": forecast_report,
             "autonomic_stabilization": stabilization_report,
             "strategic_governance_oversight": oversight_report,
-            "meta_resilience_diagnostics": meta_resilience_report
+            "meta_resilience_diagnostics": meta_resilience_report,
+            "adaptive_governance_evolution": evolution_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
 
         peers = self.registry.get_peers()
-
         peer_data: Dict[str, dict] = {}
 
         for peer in peers:
