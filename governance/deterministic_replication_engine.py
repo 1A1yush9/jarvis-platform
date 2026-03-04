@@ -3,10 +3,6 @@ Jarvis Platform
 
 Deterministic Multi-Node Governance Replication Engine
 Stage Reference: 114.0+
-
-Purpose
--------
-Replicates governance ledger entries deterministically across nodes.
 """
 
 import hashlib
