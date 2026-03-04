@@ -15,6 +15,7 @@ from governance.oversight.governance_strategic_oversight_engine import Governanc
 from governance.meta_resilience.governance_meta_resilience_engine import GovernanceMetaResilienceEngine
 from governance.evolution.governance_adaptive_evolution_engine import GovernanceAdaptiveEvolutionEngine
 from governance.strategy.governance_autonomous_strategy_engine import GovernanceAutonomousStrategyEngine
+from governance.architecture_audit.governance_self_architecture_auditor import GovernanceSelfArchitectureAuditor
 
 
 class DeterministicReplicationEngine:
@@ -34,6 +35,7 @@ class DeterministicReplicationEngine:
         Stage-122  Governance Meta-Resilience Layer
         Stage-123  Governance Adaptive Evolution Engine
         Stage-124  Governance Autonomous Strategy Layer
+        Stage-125  Governance System Self-Architecture Auditor
 
     Governance Constraints
 
@@ -47,7 +49,7 @@ class DeterministicReplicationEngine:
 
     def __init__(self):
 
-        # Core replication components
+        # Core replication
         self.registry = NodePeerRegistry()
         self.snapshot = LedgerStateSnapshot()
         self.consensus = ReplicationConsensus()
@@ -63,6 +65,7 @@ class DeterministicReplicationEngine:
         self.meta_resilience_engine = GovernanceMetaResilienceEngine()
         self.evolution_engine = GovernanceAdaptiveEvolutionEngine()
         self.strategy_engine = GovernanceAutonomousStrategyEngine()
+        self.architecture_auditor = GovernanceSelfArchitectureAuditor()
 
     def execute(self) -> Dict:
 
@@ -79,7 +82,7 @@ class DeterministicReplicationEngine:
         peer_snapshots = self._collect_peer_snapshots()
 
         # --------------------------------------------------
-        # 3. Replication consensus verification
+        # 3. Replication consensus
         # --------------------------------------------------
 
         replication_result = self.consensus.evaluate(
@@ -88,7 +91,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 4. Cluster stability evaluation
+        # 4. Cluster stability
         # --------------------------------------------------
 
         stability = self.cluster_stabilizer.evaluate(
@@ -106,7 +109,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 6. Fault domain isolation
+        # 6. Fault isolation
         # --------------------------------------------------
 
         fault_domain_report = self.fault_isolator.evaluate(
@@ -114,7 +117,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 7. Governance self-healing evaluation
+        # 7. Self-healing evaluation
         # --------------------------------------------------
 
         healing_report = self.self_healer.evaluate(
@@ -123,7 +126,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 8. Predictive governance risk forecast
+        # 8. Predictive risk forecast
         # --------------------------------------------------
 
         forecast_report = self.forecaster.evaluate(
@@ -133,7 +136,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 9. Autonomic stabilization recommendation
+        # 9. Autonomic stabilization
         # --------------------------------------------------
 
         stabilization_report = self.autonomic_stabilizer.evaluate(
@@ -143,7 +146,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 10. Strategic governance oversight
+        # 10. Strategic oversight
         # --------------------------------------------------
 
         oversight_report = self.oversight_engine.evaluate(
@@ -163,7 +166,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 12. Adaptive governance evolution
+        # 12. Adaptive evolution
         # --------------------------------------------------
 
         evolution_report = self.evolution_engine.evaluate(
@@ -173,7 +176,7 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 13. Autonomous governance strategy
+        # 13. Autonomous strategy
         # --------------------------------------------------
 
         strategy_report = self.strategy_engine.evaluate(
@@ -184,7 +187,19 @@ class DeterministicReplicationEngine:
         )
 
         # --------------------------------------------------
-        # 14. Deterministic governance output
+        # 14. Architecture audit
+        # --------------------------------------------------
+
+        architecture_report = self.architecture_auditor.evaluate(
+            strategy_report,
+            evolution_report,
+            meta_resilience_report,
+            oversight_report,
+            forecast_report
+        )
+
+        # --------------------------------------------------
+        # 15. Final deterministic governance report
         # --------------------------------------------------
 
         return {
@@ -200,7 +215,8 @@ class DeterministicReplicationEngine:
             "strategic_governance_oversight": oversight_report,
             "meta_resilience_diagnostics": meta_resilience_report,
             "adaptive_governance_evolution": evolution_report,
-            "autonomous_governance_strategy": strategy_report
+            "autonomous_governance_strategy": strategy_report,
+            "governance_architecture_audit": architecture_report
         }
 
     def _collect_peer_snapshots(self) -> Dict[str, dict]:
