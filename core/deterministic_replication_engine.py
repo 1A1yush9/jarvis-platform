@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-183.0 Integrated
+Stage-184.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -21,6 +21,8 @@ from governance.perpetual_assurance_harmonization import PerpetualAssuranceHarmo
 from governance.assurance_harmonization_ledger import AssuranceHarmonizationLedger
 from governance.eternal_coherence_closure import EternalCoherenceClosure
 from governance.coherence_closure_ledger import CoherenceClosureLedger
+from governance.perpetual_closure_sovereignty import PerpetualClosureSovereignty
+from governance.closure_sovereignty_ledger import ClosureSovereigntyLedger
 
 
 class DeterministicReplicationEngine:
@@ -43,6 +45,9 @@ class DeterministicReplicationEngine:
 
         self.coherence_ledger = CoherenceClosureLedger()
         self.coherence_engine = EternalCoherenceClosure(self.coherence_ledger)
+
+        self.sovereignty_ledger = ClosureSovereigntyLedger()
+        self.sovereignty_engine = PerpetualClosureSovereignty(self.sovereignty_ledger)
 
     # ---------------------------------------------------------
     # Deterministic Hash Utility
@@ -184,6 +189,36 @@ class DeterministicReplicationEngine:
         return {
             "stage": "183.0",
             "coherence_record": coherence_record,
+            "continuity_report": continuity_report,
+            "deterministic": True
+        }
+
+    # ---------------------------------------------------------
+    # Stage-184 Sovereignty Execution
+    # ---------------------------------------------------------
+
+    def execute_stage_184_sovereignty(
+        self,
+        coherence_report: Dict[str, Any],
+        harmonization_report: Dict[str, Any],
+        stabilization_report: Dict[str, Any],
+        convergence_report: Dict[str, Any],
+        closure_report: Dict[str, Any]
+    ) -> Dict[str, Any]:
+
+        sovereignty_record = self.sovereignty_engine.generate_sovereignty_record(
+            coherence_report,
+            harmonization_report,
+            stabilization_report,
+            convergence_report,
+            closure_report
+        )
+
+        continuity_report = self.sovereignty_engine.verify_sovereignty_continuity()
+
+        return {
+            "stage": "184.0",
+            "sovereignty_record": sovereignty_record,
             "continuity_report": continuity_report,
             "deterministic": True
         }
