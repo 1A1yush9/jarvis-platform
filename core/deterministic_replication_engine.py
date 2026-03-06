@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-185.0 Integrated
+Stage-186.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -25,6 +25,8 @@ from governance.perpetual_closure_sovereignty import PerpetualClosureSovereignty
 from governance.closure_sovereignty_ledger import ClosureSovereigntyLedger
 from governance.eternal_sovereignty_continuity import EternalSovereigntyContinuity
 from governance.sovereignty_continuity_ledger import SovereigntyContinuityLedger
+from governance.perpetual_finality_assurance import PerpetualFinalityAssurance
+from governance.finality_assurance_ledger import FinalityAssuranceLedger
 
 
 class DeterministicReplicationEngine:
@@ -54,23 +56,16 @@ class DeterministicReplicationEngine:
         self.continuity_ledger = SovereigntyContinuityLedger()
         self.continuity_engine = EternalSovereigntyContinuity(self.continuity_ledger)
 
-    # ---------------------------------------------------------
-    # Deterministic Hash Utility
-    # ---------------------------------------------------------
+        self.finality_ledger = FinalityAssuranceLedger()
+        self.finality_engine = PerpetualFinalityAssurance(self.finality_ledger)
 
     @staticmethod
     def deterministic_hash(payload: Dict[str, Any]) -> str:
         canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode()).hexdigest()
 
-    # ---------------------------------------------------------
-    # Snapshot Replication
-    # ---------------------------------------------------------
-
     def replicate_snapshot(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
-
         snapshot_hash = self.deterministic_hash(governance_state)
-
         return {
             "engine": self.ENGINE_NAMESPACE,
             "snapshot_hash": snapshot_hash,
@@ -78,9 +73,7 @@ class DeterministicReplicationEngine:
             "execution_authority": False
         }
 
-    # ---------------------------------------------------------
-    # Stage Execution Methods (179 → 185)
-    # ---------------------------------------------------------
+    # Stage Execution Methods (179 → 186)
 
     def execute_stage_179_closure(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
         seal = self.closure_engine.generate_closure_seal(governance_state)
@@ -116,3 +109,8 @@ class DeterministicReplicationEngine:
         record = self.continuity_engine.generate_continuity_record(sovereignty_report, coherence_report, harmonization_report)
         continuity = self.continuity_engine.verify_continuity_chain()
         return {"stage": "185.0", "continuity_record": record, "continuity_report": continuity, "deterministic": True}
+
+    def execute_stage_186_finality(self, continuity_report: Dict[str, Any], sovereignty_report: Dict[str, Any], coherence_report: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.finality_engine.generate_finality_record(continuity_report, sovereignty_report, coherence_report)
+        continuity = self.finality_engine.verify_finality_chain()
+        return {"stage": "186.0", "finality_record": record, "continuity_report": continuity, "deterministic": True}
