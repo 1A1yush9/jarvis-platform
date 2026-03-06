@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-180.0 Integrated
+Stage-181.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -15,6 +15,8 @@ from governance.eternal_assurance_closure import EternalAssuranceClosure
 from governance.closure_attestation_ledger import ClosureAttestationLedger
 from governance.eternal_oversight_convergence import EternalOversightConvergence
 from governance.oversight_convergence_ledger import OversightConvergenceLedger
+from governance.perpetual_oversight_stabilization import PerpetualOversightStabilization
+from governance.oversight_stabilization_ledger import OversightStabilizationLedger
 
 
 class DeterministicReplicationEngine:
@@ -22,11 +24,15 @@ class DeterministicReplicationEngine:
     ENGINE_NAMESPACE = "DETERMINISTIC_REPLICATION_ENGINE"
 
     def __init__(self):
+
         self.closure_ledger = ClosureAttestationLedger()
         self.closure_engine = EternalAssuranceClosure(self.closure_ledger)
 
         self.convergence_ledger = OversightConvergenceLedger()
         self.convergence_engine = EternalOversightConvergence(self.convergence_ledger)
+
+        self.stabilization_ledger = OversightStabilizationLedger()
+        self.stabilization_engine = PerpetualOversightStabilization(self.stabilization_ledger)
 
     # ---------------------------------------------------------
     # Deterministic Hash Utility
@@ -53,7 +59,7 @@ class DeterministicReplicationEngine:
         }
 
     # ---------------------------------------------------------
-    # Stage-179 Closure Execution (Advisory Only)
+    # Stage-179 Closure Execution
     # ---------------------------------------------------------
 
     def execute_stage_179_closure(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
@@ -69,7 +75,7 @@ class DeterministicReplicationEngine:
         }
 
     # ---------------------------------------------------------
-    # Stage-180 Convergence Execution (Advisory Only)
+    # Stage-180 Convergence Execution
     # ---------------------------------------------------------
 
     def execute_stage_180_convergence(
@@ -90,6 +96,30 @@ class DeterministicReplicationEngine:
         return {
             "stage": "180.0",
             "convergence_record": convergence_record,
+            "continuity_report": continuity_report,
+            "deterministic": True
+        }
+
+    # ---------------------------------------------------------
+    # Stage-181 Stabilization Execution
+    # ---------------------------------------------------------
+
+    def execute_stage_181_stabilization(
+        self,
+        convergence_report: Dict[str, Any],
+        telemetry_state: Dict[str, Any]
+    ) -> Dict[str, Any]:
+
+        stabilization_record = self.stabilization_engine.generate_stabilization_record(
+            convergence_report,
+            telemetry_state
+        )
+
+        continuity_report = self.stabilization_engine.verify_stabilization_continuity()
+
+        return {
+            "stage": "181.0",
+            "stabilization_record": stabilization_record,
             "continuity_report": continuity_report,
             "deterministic": True
         }
