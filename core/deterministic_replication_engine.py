@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage 179.0 Integrated
+Stage-180.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -13,6 +13,8 @@ from typing import Dict, Any
 
 from governance.eternal_assurance_closure import EternalAssuranceClosure
 from governance.closure_attestation_ledger import ClosureAttestationLedger
+from governance.eternal_oversight_convergence import EternalOversightConvergence
+from governance.oversight_convergence_ledger import OversightConvergenceLedger
 
 
 class DeterministicReplicationEngine:
@@ -20,8 +22,11 @@ class DeterministicReplicationEngine:
     ENGINE_NAMESPACE = "DETERMINISTIC_REPLICATION_ENGINE"
 
     def __init__(self):
-        self.ledger = ClosureAttestationLedger()
-        self.eternal_closure = EternalAssuranceClosure(self.ledger)
+        self.closure_ledger = ClosureAttestationLedger()
+        self.closure_engine = EternalAssuranceClosure(self.closure_ledger)
+
+        self.convergence_ledger = OversightConvergenceLedger()
+        self.convergence_engine = EternalOversightConvergence(self.convergence_ledger)
 
     # ---------------------------------------------------------
     # Deterministic Hash Utility
@@ -33,21 +38,19 @@ class DeterministicReplicationEngine:
         return hashlib.sha256(canonical.encode()).hexdigest()
 
     # ---------------------------------------------------------
-    # Governance Snapshot Replication
+    # Snapshot Replication
     # ---------------------------------------------------------
 
     def replicate_snapshot(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
 
         snapshot_hash = self.deterministic_hash(governance_state)
 
-        replication_record = {
+        return {
             "engine": self.ENGINE_NAMESPACE,
             "snapshot_hash": snapshot_hash,
             "deterministic": True,
             "execution_authority": False
         }
-
-        return replication_record
 
     # ---------------------------------------------------------
     # Stage-179 Closure Execution (Advisory Only)
@@ -55,13 +58,38 @@ class DeterministicReplicationEngine:
 
     def execute_stage_179_closure(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
 
-        closure_seal = self.eternal_closure.generate_closure_seal(governance_state)
-
-        continuity_report = self.eternal_closure.verify_eternal_continuity()
+        closure_seal = self.closure_engine.generate_closure_seal(governance_state)
+        continuity_report = self.closure_engine.verify_eternal_continuity()
 
         return {
             "stage": "179.0",
             "closure_seal": closure_seal,
+            "continuity_report": continuity_report,
+            "deterministic": True
+        }
+
+    # ---------------------------------------------------------
+    # Stage-180 Convergence Execution (Advisory Only)
+    # ---------------------------------------------------------
+
+    def execute_stage_180_convergence(
+        self,
+        closure_report: Dict[str, Any],
+        telemetry_state: Dict[str, Any],
+        foresight_state: Dict[str, Any]
+    ) -> Dict[str, Any]:
+
+        convergence_record = self.convergence_engine.generate_convergence_record(
+            closure_report,
+            telemetry_state,
+            foresight_state
+        )
+
+        continuity_report = self.convergence_engine.verify_convergence_continuity()
+
+        return {
+            "stage": "180.0",
+            "convergence_record": convergence_record,
             "continuity_report": continuity_report,
             "deterministic": True
         }
