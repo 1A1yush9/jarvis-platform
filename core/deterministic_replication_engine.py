@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-184.0 Integrated
+Stage-185.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -23,6 +23,8 @@ from governance.eternal_coherence_closure import EternalCoherenceClosure
 from governance.coherence_closure_ledger import CoherenceClosureLedger
 from governance.perpetual_closure_sovereignty import PerpetualClosureSovereignty
 from governance.closure_sovereignty_ledger import ClosureSovereigntyLedger
+from governance.eternal_sovereignty_continuity import EternalSovereigntyContinuity
+from governance.sovereignty_continuity_ledger import SovereigntyContinuityLedger
 
 
 class DeterministicReplicationEngine:
@@ -49,6 +51,9 @@ class DeterministicReplicationEngine:
         self.sovereignty_ledger = ClosureSovereigntyLedger()
         self.sovereignty_engine = PerpetualClosureSovereignty(self.sovereignty_ledger)
 
+        self.continuity_ledger = SovereigntyContinuityLedger()
+        self.continuity_engine = EternalSovereigntyContinuity(self.continuity_ledger)
+
     # ---------------------------------------------------------
     # Deterministic Hash Utility
     # ---------------------------------------------------------
@@ -74,151 +79,40 @@ class DeterministicReplicationEngine:
         }
 
     # ---------------------------------------------------------
-    # Stage-179 Closure Execution
+    # Stage Execution Methods (179 → 185)
     # ---------------------------------------------------------
 
     def execute_stage_179_closure(self, governance_state: Dict[str, Any]) -> Dict[str, Any]:
+        seal = self.closure_engine.generate_closure_seal(governance_state)
+        continuity = self.closure_engine.verify_eternal_continuity()
+        return {"stage": "179.0", "closure_seal": seal, "continuity_report": continuity, "deterministic": True}
 
-        closure_seal = self.closure_engine.generate_closure_seal(governance_state)
-        continuity_report = self.closure_engine.verify_eternal_continuity()
+    def execute_stage_180_convergence(self, closure_report: Dict[str, Any], telemetry_state: Dict[str, Any], foresight_state: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.convergence_engine.generate_convergence_record(closure_report, telemetry_state, foresight_state)
+        continuity = self.convergence_engine.verify_convergence_continuity()
+        return {"stage": "180.0", "convergence_record": record, "continuity_report": continuity, "deterministic": True}
 
-        return {
-            "stage": "179.0",
-            "closure_seal": closure_seal,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
+    def execute_stage_181_stabilization(self, convergence_report: Dict[str, Any], telemetry_state: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.stabilization_engine.generate_stabilization_record(convergence_report, telemetry_state)
+        continuity = self.stabilization_engine.verify_stabilization_continuity()
+        return {"stage": "181.0", "stabilization_record": record, "continuity_report": continuity, "deterministic": True}
 
-    # ---------------------------------------------------------
-    # Stage-180 Convergence Execution
-    # ---------------------------------------------------------
+    def execute_stage_182_harmonization(self, stabilization_report: Dict[str, Any], convergence_report: Dict[str, Any], closure_report: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.harmonization_engine.generate_harmonization_record(stabilization_report, convergence_report, closure_report)
+        continuity = self.harmonization_engine.verify_harmonization_continuity()
+        return {"stage": "182.0", "harmonization_record": record, "continuity_report": continuity, "deterministic": True}
 
-    def execute_stage_180_convergence(
-        self,
-        closure_report: Dict[str, Any],
-        telemetry_state: Dict[str, Any],
-        foresight_state: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def execute_stage_183_coherence(self, harmonization_report: Dict[str, Any], stabilization_report: Dict[str, Any], convergence_report: Dict[str, Any], closure_report: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.coherence_engine.generate_coherence_record(harmonization_report, stabilization_report, convergence_report, closure_report)
+        continuity = self.coherence_engine.verify_coherence_continuity()
+        return {"stage": "183.0", "coherence_record": record, "continuity_report": continuity, "deterministic": True}
 
-        convergence_record = self.convergence_engine.generate_convergence_record(
-            closure_report,
-            telemetry_state,
-            foresight_state
-        )
+    def execute_stage_184_sovereignty(self, coherence_report: Dict[str, Any], harmonization_report: Dict[str, Any], stabilization_report: Dict[str, Any], convergence_report: Dict[str, Any], closure_report: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.sovereignty_engine.generate_sovereignty_record(coherence_report, harmonization_report, stabilization_report, convergence_report, closure_report)
+        continuity = self.sovereignty_engine.verify_sovereignty_continuity()
+        return {"stage": "184.0", "sovereignty_record": record, "continuity_report": continuity, "deterministic": True}
 
-        continuity_report = self.convergence_engine.verify_convergence_continuity()
-
-        return {
-            "stage": "180.0",
-            "convergence_record": convergence_record,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
-
-    # ---------------------------------------------------------
-    # Stage-181 Stabilization Execution
-    # ---------------------------------------------------------
-
-    def execute_stage_181_stabilization(
-        self,
-        convergence_report: Dict[str, Any],
-        telemetry_state: Dict[str, Any]
-    ) -> Dict[str, Any]:
-
-        stabilization_record = self.stabilization_engine.generate_stabilization_record(
-            convergence_report,
-            telemetry_state
-        )
-
-        continuity_report = self.stabilization_engine.verify_stabilization_continuity()
-
-        return {
-            "stage": "181.0",
-            "stabilization_record": stabilization_record,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
-
-    # ---------------------------------------------------------
-    # Stage-182 Harmonization Execution
-    # ---------------------------------------------------------
-
-    def execute_stage_182_harmonization(
-        self,
-        stabilization_report: Dict[str, Any],
-        convergence_report: Dict[str, Any],
-        closure_report: Dict[str, Any]
-    ) -> Dict[str, Any]:
-
-        harmonization_record = self.harmonization_engine.generate_harmonization_record(
-            stabilization_report,
-            convergence_report,
-            closure_report
-        )
-
-        continuity_report = self.harmonization_engine.verify_harmonization_continuity()
-
-        return {
-            "stage": "182.0",
-            "harmonization_record": harmonization_record,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
-
-    # ---------------------------------------------------------
-    # Stage-183 Coherence Execution
-    # ---------------------------------------------------------
-
-    def execute_stage_183_coherence(
-        self,
-        harmonization_report: Dict[str, Any],
-        stabilization_report: Dict[str, Any],
-        convergence_report: Dict[str, Any],
-        closure_report: Dict[str, Any]
-    ) -> Dict[str, Any]:
-
-        coherence_record = self.coherence_engine.generate_coherence_record(
-            harmonization_report,
-            stabilization_report,
-            convergence_report,
-            closure_report
-        )
-
-        continuity_report = self.coherence_engine.verify_coherence_continuity()
-
-        return {
-            "stage": "183.0",
-            "coherence_record": coherence_record,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
-
-    # ---------------------------------------------------------
-    # Stage-184 Sovereignty Execution
-    # ---------------------------------------------------------
-
-    def execute_stage_184_sovereignty(
-        self,
-        coherence_report: Dict[str, Any],
-        harmonization_report: Dict[str, Any],
-        stabilization_report: Dict[str, Any],
-        convergence_report: Dict[str, Any],
-        closure_report: Dict[str, Any]
-    ) -> Dict[str, Any]:
-
-        sovereignty_record = self.sovereignty_engine.generate_sovereignty_record(
-            coherence_report,
-            harmonization_report,
-            stabilization_report,
-            convergence_report,
-            closure_report
-        )
-
-        continuity_report = self.sovereignty_engine.verify_sovereignty_continuity()
-
-        return {
-            "stage": "184.0",
-            "sovereignty_record": sovereignty_record,
-            "continuity_report": continuity_report,
-            "deterministic": True
-        }
+    def execute_stage_185_continuity(self, sovereignty_report: Dict[str, Any], coherence_report: Dict[str, Any], harmonization_report: Dict[str, Any]) -> Dict[str, Any]:
+        record = self.continuity_engine.generate_continuity_record(sovereignty_report, coherence_report, harmonization_report)
+        continuity = self.continuity_engine.verify_continuity_chain()
+        return {"stage": "185.0", "continuity_record": record, "continuity_report": continuity, "deterministic": True}
