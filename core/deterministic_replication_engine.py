@@ -5,18 +5,10 @@ Canonical Governance Backbone (FULL DELIVERY)
 Operating Mode: Advisory Cognition ONLY
 Mutation Authority: NONE
 Execution Authority: NONE
-
-Responsibilities:
-
-• Governance Snapshot Access (read-only)
-• Ledger State Access (append-only verification)
-• Canonical Baseline Preservation
-• Deterministic Serialization Enforcement
 """
 
 from __future__ import annotations
 
-import json
 from typing import Dict, Any
 
 
