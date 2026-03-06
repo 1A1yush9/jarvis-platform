@@ -1,10 +1,9 @@
 # deterministic_replication_engine.py
-# Deterministic Replication Engine (Stage-171.0 Compatible)
+# Deterministic Replication Engine (Stage-172.0 Compatible)
 
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 from typing import List
 
