@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-182.0 Integrated
+Stage-183.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -19,6 +19,8 @@ from governance.perpetual_oversight_stabilization import PerpetualOversightStabi
 from governance.oversight_stabilization_ledger import OversightStabilizationLedger
 from governance.perpetual_assurance_harmonization import PerpetualAssuranceHarmonization
 from governance.assurance_harmonization_ledger import AssuranceHarmonizationLedger
+from governance.eternal_coherence_closure import EternalCoherenceClosure
+from governance.coherence_closure_ledger import CoherenceClosureLedger
 
 
 class DeterministicReplicationEngine:
@@ -38,6 +40,9 @@ class DeterministicReplicationEngine:
 
         self.harmonization_ledger = AssuranceHarmonizationLedger()
         self.harmonization_engine = PerpetualAssuranceHarmonization(self.harmonization_ledger)
+
+        self.coherence_ledger = CoherenceClosureLedger()
+        self.coherence_engine = EternalCoherenceClosure(self.coherence_ledger)
 
     # ---------------------------------------------------------
     # Deterministic Hash Utility
@@ -151,6 +156,34 @@ class DeterministicReplicationEngine:
         return {
             "stage": "182.0",
             "harmonization_record": harmonization_record,
+            "continuity_report": continuity_report,
+            "deterministic": True
+        }
+
+    # ---------------------------------------------------------
+    # Stage-183 Coherence Execution
+    # ---------------------------------------------------------
+
+    def execute_stage_183_coherence(
+        self,
+        harmonization_report: Dict[str, Any],
+        stabilization_report: Dict[str, Any],
+        convergence_report: Dict[str, Any],
+        closure_report: Dict[str, Any]
+    ) -> Dict[str, Any]:
+
+        coherence_record = self.coherence_engine.generate_coherence_record(
+            harmonization_report,
+            stabilization_report,
+            convergence_report,
+            closure_report
+        )
+
+        continuity_report = self.coherence_engine.verify_coherence_continuity()
+
+        return {
+            "stage": "183.0",
+            "coherence_record": coherence_record,
             "continuity_report": continuity_report,
             "deterministic": True
         }
