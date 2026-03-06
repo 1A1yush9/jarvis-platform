@@ -1,6 +1,6 @@
 """
 Jarvis Platform — Deterministic Replication Engine
-Stage-181.0 Integrated
+Stage-182.0 Integrated
 
 Advisory Only | Deterministic | Render Safe
 """
@@ -17,6 +17,8 @@ from governance.eternal_oversight_convergence import EternalOversightConvergence
 from governance.oversight_convergence_ledger import OversightConvergenceLedger
 from governance.perpetual_oversight_stabilization import PerpetualOversightStabilization
 from governance.oversight_stabilization_ledger import OversightStabilizationLedger
+from governance.perpetual_assurance_harmonization import PerpetualAssuranceHarmonization
+from governance.assurance_harmonization_ledger import AssuranceHarmonizationLedger
 
 
 class DeterministicReplicationEngine:
@@ -33,6 +35,9 @@ class DeterministicReplicationEngine:
 
         self.stabilization_ledger = OversightStabilizationLedger()
         self.stabilization_engine = PerpetualOversightStabilization(self.stabilization_ledger)
+
+        self.harmonization_ledger = AssuranceHarmonizationLedger()
+        self.harmonization_engine = PerpetualAssuranceHarmonization(self.harmonization_ledger)
 
     # ---------------------------------------------------------
     # Deterministic Hash Utility
@@ -120,6 +125,32 @@ class DeterministicReplicationEngine:
         return {
             "stage": "181.0",
             "stabilization_record": stabilization_record,
+            "continuity_report": continuity_report,
+            "deterministic": True
+        }
+
+    # ---------------------------------------------------------
+    # Stage-182 Harmonization Execution
+    # ---------------------------------------------------------
+
+    def execute_stage_182_harmonization(
+        self,
+        stabilization_report: Dict[str, Any],
+        convergence_report: Dict[str, Any],
+        closure_report: Dict[str, Any]
+    ) -> Dict[str, Any]:
+
+        harmonization_record = self.harmonization_engine.generate_harmonization_record(
+            stabilization_report,
+            convergence_report,
+            closure_report
+        )
+
+        continuity_report = self.harmonization_engine.verify_harmonization_continuity()
+
+        return {
+            "stage": "182.0",
+            "harmonization_record": harmonization_record,
             "continuity_report": continuity_report,
             "deterministic": True
         }
