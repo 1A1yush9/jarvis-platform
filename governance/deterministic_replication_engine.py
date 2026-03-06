@@ -1,69 +1,51 @@
-"""
-Jarvis Platform
+# deterministic_replication_engine.py
+# Deterministic Replication Engine (Stage-171.0 Compatible)
 
-Deterministic Multi-Node Governance Replication Engine
-Stage Reference: 114.0+
-"""
+from __future__ import annotations
 
 import hashlib
 import json
-import time
-from typing import List, Dict, Any
+import os
+from typing import List
+
+
+LEDGER_PATH = "governance/ledger/governance_ledger.jsonl"
+
+
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 class DeterministicReplicationEngine:
+    """
+    Guarantees:
 
-    MODULE = "deterministic_replication_engine"
+    • Replay determinism
+    • Hash-consistent replication
+    • Immutable governance alignment
+    """
 
-    def __init__(self, node_id: str):
-        self.node_id = node_id
-        self.replication_log: List[Dict[str, Any]] = []
+    def __init__(self) -> None:
+        pass
 
-    # -------------------------------------------------------------
+    def read_ledger(self) -> List[str]:
+        if not os.path.exists(LEDGER_PATH):
+            return []
 
-    def _hash(self, payload: Dict[str, Any]) -> str:
+        with open(LEDGER_PATH, "r", encoding="utf-8") as f:
+            return [line.rstrip("\n") for line in f]
 
-        encoded = json.dumps(payload, sort_keys=True).encode()
+    def compute_state_hash(self) -> str:
+        entries = self.read_ledger()
+        canonical_blob = "\n".join(entries).encode("utf-8")
+        return _sha256(canonical_blob)
 
-        return hashlib.sha256(encoded).hexdigest()
-
-    # -------------------------------------------------------------
-
-    def replicate(self, ledger_entry: Dict[str, Any]) -> Dict[str, Any]:
-
-        replication_record = {
-            "module": self.MODULE,
-            "node_id": self.node_id,
-            "timestamp": int(time.time()),
-            "ledger_hash": self._hash(ledger_entry),
-            "ledger_stage": ledger_entry.get("stage"),
-            "ledger_module": ledger_entry.get("module")
+    def deterministic_replay(self) -> dict:
+        entries = self.read_ledger()
+        return {
+            "entry_count": len(entries),
+            "state_hash": self.compute_state_hash(),
         }
 
-        replication_record["replication_hash"] = self._hash(replication_record)
-
-        self.replication_log.append(replication_record)
-
-        return replication_record
-
-    # -------------------------------------------------------------
-
-    def verify_replication(self) -> bool:
-
-        previous = None
-
-        for entry in self.replication_log:
-
-            if previous:
-                if entry["timestamp"] < previous["timestamp"]:
-                    return False
-
-            previous = entry
-
-        return True
-
-    # -------------------------------------------------------------
-
-    def export_replication_log(self) -> List[Dict[str, Any]]:
-
-        return list(self.replication_log)
+    def verify_external_state(self, external_hash: str) -> bool:
+        return self.compute_state_hash() == external_hash
