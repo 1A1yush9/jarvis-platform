@@ -1,54 +1,35 @@
-require("dotenv").config();
-
 const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const { MessagingResponse } = require("twilio").twiml;
 
 const app = express();
 
-// ✅ REQUIRED FOR TWILIO
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Middleware
+app.use(bodyParser.urlencoded({ extended: false }));
 
-// ✅ ROUTE
-app.post("/webhook", async (req, res) => {
-  try {
-    console.log("INCOMING:", req.body);
-
-    const from = req.body.From;   // whatsapp:+91xxxx
-    const body = req.body.Body;   // message text
-
-    const twilio = require("twilio");
-    const client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
-
-    // ✅ SIMPLE TEST REPLY
-    await client.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: from,
-      body: "✅ Jarvis Reply: Message received -> " + body
-    });
-
-    res.sendStatus(200);
-
-  } catch (err) {
-    console.log("ERROR:", err.message);
-    res.sendStatus(500);
-  }
-});
-
-// TEST ROUTE
+// Root route (for testing server)
 app.get("/", (req, res) => {
-  res.send("Server Working ✅");
+    console.log("Root HIT ✅");
+    res.send("Server Working ✅");
 });
 
-// DB (optional but keep)
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+// Webhook route (Twilio hits here)
+app.post("/webhook", (req, res) => {
+    console.log("Webhook HIT ✅");
+    console.log("From:", req.body.From);
+    console.log("Message:", req.body.Body);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log("Server running on " + PORT));
+    const twiml = new MessagingResponse();
+
+    // Simple auto reply
+    twiml.message("🔥 Jarvis LIVE — Auto Reply Working!");
+
+    res.set("Content-Type", "text/xml");
+    res.send(twiml.toString());
+});
+
+// Start server
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
