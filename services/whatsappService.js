@@ -1,23 +1,24 @@
-const twilio = require("twilio");
+const axios = require("axios");
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-const sendWhatsAppMessage = async (to, message) => {
+const sendWhatsApp = async (to, message) => {
   try {
-    await client.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER, // whatsapp:+14155238886
-      to: `whatsapp:${to}`,
-      body: message
-    });
-
-    console.log("✅ Message sent to:", to);
-
-  } catch (error) {
-    console.error("❌ Twilio Send Error:", error.message);
+    await axios.post(
+      `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+      new URLSearchParams({
+        From: process.env.TWILIO_WHATSAPP_NUMBER,
+        To: to,
+        Body: message
+      }),
+      {
+        auth: {
+          username: process.env.TWILIO_ACCOUNT_SID,
+          password: process.env.TWILIO_AUTH_TOKEN
+        }
+      }
+    );
+  } catch (err) {
+    console.error("WhatsApp Error:", err.message);
   }
 };
 
-module.exports = { sendWhatsAppMessage };
+module.exports = sendWhatsApp;
