@@ -1,5 +1,5 @@
 // =======================
-// JARVIS WHATSAPP AI SERVER (GROQ FREE VERSION)
+// JARVIS WHATSAPP AI SERVER (FINAL CLEAN VERSION)
 // =======================
 
 require("dotenv").config();
@@ -7,7 +7,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const bodyParser = require("body-parser");
-const twilio = require("twilio");
+const { twiml } = require("twilio");
+
+const MessagingResponse = twiml.MessagingResponse;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -18,16 +20,8 @@ app.use(bodyParser.json());
 // =======================
 const {
   MONGO_URI,
-  GROQ_API_KEY,
-  TWILIO_ACCOUNT_SID,
-  TWILIO_AUTH_TOKEN,
-  TWILIO_WHATSAPP_NUMBER
+  GROQ_API_KEY
 } = process.env;
-
-// =======================
-// TWILIO CLIENT
-// =======================
-const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 // =======================
 // DATABASE CONNECT
@@ -49,7 +43,7 @@ const ChatSchema = new mongoose.Schema({
 const Chat = mongoose.model("Chat", ChatSchema);
 
 // =======================
-// GROQ AI FUNCTION (FREE)
+// GROQ AI FUNCTION
 // =======================
 async function getAIReply(userMessage) {
   try {
@@ -58,14 +52,8 @@ async function getAIReply(userMessage) {
       {
         model: "llama3-8b-8192",
         messages: [
-          {
-            role: "system",
-            content: "You are a smart business assistant. Reply short, clear, and helpful."
-          },
-          {
-            role: "user",
-            content: userMessage
-          }
+          { role: "system", content: "Reply short, smart, business-focused." },
+          { role: "user", content: userMessage }
         ],
         max_tokens: 150
       },
@@ -86,7 +74,7 @@ async function getAIReply(userMessage) {
 }
 
 // =======================
-// WHATSAPP WEBHOOK
+// WHATSAPP WEBHOOK (FINAL)
 // =======================
 app.post("/webhook/whatsapp", async (req, res) => {
   try {
@@ -95,26 +83,19 @@ app.post("/webhook/whatsapp", async (req, res) => {
 
     console.log("📩 Incoming:", incomingMsg);
 
-    // AI reply
     const aiReply = await getAIReply(incomingMsg);
 
-    // Save chat
     await Chat.create({
       user: from,
       message: incomingMsg,
       reply: aiReply
     });
 
-    // Send reply
-    await client.messages.create({
-      body: aiReply,
-      from: TWILIO_WHATSAPP_NUMBER,
-      to: from
-    });
+    const twimlResponse = new MessagingResponse();
+    twimlResponse.message(aiReply);
 
-    console.log("✅ Reply Sent:", aiReply);
-
-    res.sendStatus(200);
+    res.writeHead(200, { "Content-Type": "text/xml" });
+    res.end(twimlResponse.toString());
 
   } catch (error) {
     console.error("❌ Webhook Error:", error);
@@ -130,5 +111,5 @@ app.get("/", (req, res) => {
 });
 
 // =======================
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🔥 Server running on port ${PORT}`));
