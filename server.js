@@ -9,26 +9,24 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-// 🔥 HEALTH CHECK
+// ROOT
 app.get("/", (req, res) => {
   res.send("SERVER LIVE ✅");
 });
 
-// 🔥 WHATSAPP WEBHOOK
+// WEBHOOK
 app.post("/webhook", async (req, res) => {
   try {
     console.log("Incoming:", req.body);
 
     const userMsg = req.body.Body;
-    const from = req.body.From;
 
     if (!userMsg) {
       return res.send("OK");
     }
 
-    // 🔥 CALL GROQ AI
     const aiRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -42,12 +40,10 @@ app.post("/webhook", async (req, res) => {
     });
 
     const aiData = await aiRes.json();
-    const reply =
-      aiData?.choices?.[0]?.message?.content || "AI error, try again.";
+    const reply = aiData?.choices?.[0]?.message?.content || "Error";
 
-    console.log("AI Reply:", reply);
+    console.log("Reply:", reply);
 
-    // 🔥 TWILIO RESPONSE (MANDATORY FORMAT)
     res.set("Content-Type", "text/xml");
     res.send(`
       <Response>
@@ -62,5 +58,5 @@ app.post("/webhook", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on ${PORT}`);
 });
