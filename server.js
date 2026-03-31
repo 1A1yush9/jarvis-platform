@@ -1,115 +1,66 @@
-// =======================
-// JARVIS WHATSAPP AI SERVER (FINAL CLEAN VERSION)
-// =======================
+import express from "express";
+import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import fetch from "node-fetch";
 
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const axios = require("axios");
-const bodyParser = require("body-parser");
-const { twiml } = require("twilio");
-
-const MessagingResponse = twiml.MessagingResponse;
+dotenv.config();
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// =======================
-// ENV VARIABLES
-// =======================
-const {
-  MONGO_URI,
-  GROQ_API_KEY
-} = process.env;
+const PORT = process.env.PORT || 5000;
 
-// =======================
-// DATABASE CONNECT
-// =======================
-mongoose.connect(MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ Mongo Error:", err));
-
-// =======================
-// SCHEMA
-// =======================
-const ChatSchema = new mongoose.Schema({
-  user: String,
-  message: String,
-  reply: String,
-  createdAt: { type: Date, default: Date.now }
+// 🔥 HEALTH CHECK
+app.get("/", (req, res) => {
+  res.send("SERVER LIVE ✅");
 });
 
-const Chat = mongoose.model("Chat", ChatSchema);
-
-// =======================
-// GROQ AI FUNCTION
-// =======================
-async function getAIReply(userMessage) {
+// 🔥 WHATSAPP WEBHOOK
+app.post("/webhook", async (req, res) => {
   try {
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama3-8b-8192",
-        messages: [
-          { role: "system", content: "Reply short, smart, business-focused." },
-          { role: "user", content: userMessage }
-        ],
-        max_tokens: 150
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    console.log("Incoming:", req.body);
 
-    return response.data.choices[0].message.content;
-
-  } catch (error) {
-    console.error("❌ GROQ ERROR:", error.response?.data || error.message);
-    return "⚠️ AI temporarily unavailable.";
-  }
-}
-
-// =======================
-// WHATSAPP WEBHOOK (FINAL)
-// =======================
-app.post("/webhook/whatsapp", async (req, res) => {
-  try {
-    const incomingMsg = req.body.Body;
+    const userMsg = req.body.Body;
     const from = req.body.From;
 
-    console.log("📩 Incoming:", incomingMsg);
+    if (!userMsg) {
+      return res.send("OK");
+    }
 
-    const aiReply = await getAIReply(incomingMsg);
-
-    await Chat.create({
-      user: from,
-      message: incomingMsg,
-      reply: aiReply
+    // 🔥 CALL GROQ AI
+    const aiRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages: [{ role: "user", content: userMsg }]
+      })
     });
 
-    const twimlResponse = new MessagingResponse();
-    twimlResponse.message(aiReply);
+    const aiData = await aiRes.json();
+    const reply =
+      aiData?.choices?.[0]?.message?.content || "AI error, try again.";
 
-    res.writeHead(200, { "Content-Type": "text/xml" });
-    res.end(twimlResponse.toString());
+    console.log("AI Reply:", reply);
 
-  } catch (error) {
-    console.error("❌ Webhook Error:", error);
-    res.sendStatus(500);
+    // 🔥 TWILIO RESPONSE (MANDATORY FORMAT)
+    res.set("Content-Type", "text/xml");
+    res.send(`
+      <Response>
+        <Message>${reply}</Message>
+      </Response>
+    `);
+
+  } catch (err) {
+    console.error("ERROR:", err);
+    res.send("Error");
   }
 });
 
-// =======================
-// HEALTH CHECK
-// =======================
-app.get("/", (req, res) => {
-  res.send("🚀 Jarvis AI (Groq Free) is LIVE");
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// =======================
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🔥 Server running on port ${PORT}`));
