@@ -1,18 +1,13 @@
 {
   "name": "jarvis-saas-backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.14.0",
-    "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^4.22.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.23.0",
-    "openai": "^6.33.0",
-    "twilio": "^5.13.1"
+    "express": "^4.22.1"
   }
 }

@@ -1,62 +1,78 @@
 import express from "express";
-import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
 
 dotenv.config();
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 10000;
+// CRITICAL: Twilio sends urlencoded
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-// ROOT
+const PORT = process.env.PORT || 3000;
+
+// ✅ HEALTH CHECK
 app.get("/", (req, res) => {
-  res.send("SERVER LIVE ✅");
+  res.send("Jarvis Backend LIVE ✅");
 });
 
-// WEBHOOK
-app.post("/webhook", async (req, res) => {
+// ✅ WEBHOOK (FINAL WORKING)
+app.post("/webhook/whatsapp", async (req, res) => {
   try {
-    console.log("Incoming:", req.body);
+    console.log("🔥 WEBHOOK HIT");
+    console.log("BODY:", req.body);
 
-    const userMsg = req.body.Body;
+    const incomingMsg = req.body.Body;
+    const from = req.body.From;
 
-    if (!userMsg) {
-      return res.send("OK");
+    if (!incomingMsg) {
+      console.log("❌ No message");
+      return res.sendStatus(200);
     }
 
+    console.log(`📩 ${from}: ${incomingMsg}`);
+
+    // 🤖 GROQ AI CALL (DIRECT FETCH)
     const aiRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-        "Content-Type": "application/json"
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
-        messages: [{ role: "user", content: userMsg }]
+        model: "llama3-70b-8192",
+        messages: [
+          { role: "system", content: "You are Jarvis, a smart AI business assistant." },
+          { role: "user", content: incomingMsg }
+        ]
       })
     });
 
-    const aiData = await aiRes.json();
-    const reply = aiData?.choices?.[0]?.message?.content || "Error";
+    const data = await aiRes.json();
 
-    console.log("Reply:", reply);
+    let reply = "⚠️ AI not responding";
+
+    if (data?.choices?.[0]?.message?.content) {
+      reply = data.choices[0].message.content;
+    }
+
+    console.log("🤖 Reply:", reply);
+
+    // ✅ TWILIO XML RESPONSE (MANDATORY)
+    const twiml = `
+<Response>
+<Message>${reply}</Message>
+</Response>`;
 
     res.set("Content-Type", "text/xml");
-    res.send(`
-      <Response>
-        <Message>${reply}</Message>
-      </Response>
-    `);
+    res.send(twiml);
 
-  } catch (err) {
-    console.error("ERROR:", err);
-    res.send("Error");
+  } catch (error) {
+    console.error("❌ ERROR:", error);
+    res.sendStatus(200);
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
