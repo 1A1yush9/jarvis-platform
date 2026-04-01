@@ -5,18 +5,18 @@ dotenv.config();
 
 const app = express();
 
-// CRITICAL: Twilio sends urlencoded
+// Twilio needs this
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-// ✅ HEALTH CHECK
+// HEALTH
 app.get("/", (req, res) => {
   res.send("Jarvis Backend LIVE ✅");
 });
 
-// ✅ WEBHOOK (FINAL WORKING)
+// ✅ WHATSAPP WEBHOOK
 app.post("/webhook/whatsapp", async (req, res) => {
   try {
     console.log("🔥 WEBHOOK HIT");
@@ -26,13 +26,13 @@ app.post("/webhook/whatsapp", async (req, res) => {
     const from = req.body.From;
 
     if (!incomingMsg) {
-      console.log("❌ No message");
+      console.log("❌ No message body");
       return res.sendStatus(200);
     }
 
     console.log(`📩 ${from}: ${incomingMsg}`);
 
-    // 🤖 GROQ AI CALL (DIRECT FETCH)
+    // 🤖 GROQ AI
     const aiRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -58,7 +58,7 @@ app.post("/webhook/whatsapp", async (req, res) => {
 
     console.log("🤖 Reply:", reply);
 
-    // ✅ TWILIO XML RESPONSE (MANDATORY)
+    // ✅ TWILIO XML RESPONSE
     const twiml = `
 <Response>
 <Message>${reply}</Message>

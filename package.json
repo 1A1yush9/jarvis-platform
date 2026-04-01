@@ -2,9 +2,9 @@
   "name": "jarvis-saas-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "enterprise-server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node enterprise-server.js"
   },
   "dependencies": {
     "dotenv": "^16.6.1",
