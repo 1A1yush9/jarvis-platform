@@ -1,45 +1,44 @@
 // ===============================
-// ENTERPRISE SERVER (FINAL BUILD)
-// WhatsApp + Twilio + Groq AI
+// JARVIS FINAL SERVER (STABLE BUILD)
 // ===============================
 
-import express from "express";
-import dotenv from "dotenv";
-import fetch from "node-fetch";
-import bodyParser from "body-parser";
+const express = require("express");
+const dotenv = require("dotenv");
+const fetch = require("node-fetch");
+const bodyParser = require("body-parser");
 
 dotenv.config();
 
 const app = express();
 
 // ===============================
-// IMPORTANT: Twilio requires URL-encoded parser
+// MIDDLEWARE (CRITICAL FOR TWILIO)
 // ===============================
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // ===============================
-// HEALTH CHECK (Render uses this)
+// ROOT ROUTE (HEALTH CHECK)
 // ===============================
 app.get("/", (req, res) => {
   res.send("🚀 Jarvis SaaS Backend LIVE");
 });
 
 // ===============================
-// 🔥 MAIN WEBHOOK (CRITICAL)
+// WEBHOOK ROUTE (WHATSAPP)
 // ===============================
 app.post("/webhook/whatsapp", async (req, res) => {
   console.log("🔥 WEBHOOK HIT");
 
   try {
-    const incomingMsg = req.body.Body || "";
-    const from = req.body.From || "";
+    const incomingMsg = req.body.Body || "No message";
+    const from = req.body.From || "Unknown";
 
     console.log("📩 Message:", incomingMsg);
     console.log("👤 From:", from);
 
     // ===============================
-    // GROQ AI CALL (OpenAI Compatible)
+    // GROQ AI API
     // ===============================
     const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -50,14 +49,8 @@ app.post("/webhook/whatsapp", async (req, res) => {
       body: JSON.stringify({
         model: "llama3-70b-8192",
         messages: [
-          {
-            role: "system",
-            content: "You are Jarvis, a smart business assistant for WhatsApp automation. Keep replies short, helpful, and professional."
-          },
-          {
-            role: "user",
-            content: incomingMsg
-          }
+          { role: "system", content: "You are a smart WhatsApp assistant. Keep replies short and useful." },
+          { role: "user", content: incomingMsg }
         ],
         temperature: 0.7
       })
@@ -65,45 +58,41 @@ app.post("/webhook/whatsapp", async (req, res) => {
 
     const data = await aiResponse.json();
 
-    let replyText = "⚠️ AI error, try again.";
+    let reply = "⚠️ AI not responding";
 
     if (data && data.choices && data.choices.length > 0) {
-      replyText = data.choices[0].message.content;
+      reply = data.choices[0].message.content;
     }
 
-    console.log("🤖 AI Reply:", replyText);
+    console.log("🤖 Reply:", reply);
 
     // ===============================
-    // TWIML RESPONSE (MANDATORY)
+    // TWIML RESPONSE
     // ===============================
-    const twimlResponse = `
-      <Response>
-        <Message>${escapeXml(replyText)}</Message>
-      </Response>
-    `;
-
     res.set("Content-Type", "text/xml");
-    res.send(twimlResponse);
+    res.send(`
+      <Response>
+        <Message>${escapeXml(reply)}</Message>
+      </Response>
+    `);
 
   } catch (error) {
     console.error("❌ ERROR:", error);
 
-    const fallback = `
-      <Response>
-        <Message>⚠️ Server error. Please try again later.</Message>
-      </Response>
-    `;
-
     res.set("Content-Type", "text/xml");
-    res.send(fallback);
+    res.send(`
+      <Response>
+        <Message>⚠️ Server error</Message>
+      </Response>
+    `);
   }
 });
 
 // ===============================
-// XML ESCAPE (IMPORTANT)
+// XML SAFE FUNCTION
 // ===============================
-function escapeXml(unsafe) {
-  return unsafe
+function escapeXml(str) {
+  return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -112,10 +101,10 @@ function escapeXml(unsafe) {
 }
 
 // ===============================
-// SERVER START (Render PORT)
+// START SERVER
 // ===============================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log("🚀 Server running on port " + PORT);
 });
