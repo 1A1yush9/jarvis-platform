@@ -1,77 +1,120 @@
+// ===============================
+// ENTERPRISE SERVER (FINAL BUILD)
+// WhatsApp + Twilio + Groq AI
+// ===============================
+
 import express from "express";
 import dotenv from "dotenv";
+import fetch from "node-fetch";
+import bodyParser from "body-parser";
 
 dotenv.config();
 
 const app = express();
 
-// Twilio needs this
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// ===============================
+// IMPORTANT: Twilio requires URL-encoded parser
+// ===============================
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 10000;
-
-// HEALTH
+// ===============================
+// HEALTH CHECK (Render uses this)
+// ===============================
 app.get("/", (req, res) => {
-  res.send("Jarvis Backend LIVE ✅");
+  res.send("🚀 Jarvis SaaS Backend LIVE");
 });
 
-// ✅ WHATSAPP WEBHOOK
+// ===============================
+// 🔥 MAIN WEBHOOK (CRITICAL)
+// ===============================
 app.post("/webhook/whatsapp", async (req, res) => {
+  console.log("🔥 WEBHOOK HIT");
+
   try {
-    console.log("🔥 WEBHOOK HIT");
-    console.log("BODY:", req.body);
+    const incomingMsg = req.body.Body || "";
+    const from = req.body.From || "";
 
-    const incomingMsg = req.body.Body;
-    const from = req.body.From;
+    console.log("📩 Message:", incomingMsg);
+    console.log("👤 From:", from);
 
-    if (!incomingMsg) {
-      console.log("❌ No message body");
-      return res.sendStatus(200);
-    }
-
-    console.log(`📩 ${from}: ${incomingMsg}`);
-
-    // 🤖 GROQ AI
-    const aiRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    // ===============================
+    // GROQ AI CALL (OpenAI Compatible)
+    // ===============================
+    const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: "llama3-70b-8192",
         messages: [
-          { role: "system", content: "You are Jarvis, a smart AI business assistant." },
-          { role: "user", content: incomingMsg }
-        ]
+          {
+            role: "system",
+            content: "You are Jarvis, a smart business assistant for WhatsApp automation. Keep replies short, helpful, and professional."
+          },
+          {
+            role: "user",
+            content: incomingMsg
+          }
+        ],
+        temperature: 0.7
       })
     });
 
-    const data = await aiRes.json();
+    const data = await aiResponse.json();
 
-    let reply = "⚠️ AI not responding";
+    let replyText = "⚠️ AI error, try again.";
 
-    if (data?.choices?.[0]?.message?.content) {
-      reply = data.choices[0].message.content;
+    if (data && data.choices && data.choices.length > 0) {
+      replyText = data.choices[0].message.content;
     }
 
-    console.log("🤖 Reply:", reply);
+    console.log("🤖 AI Reply:", replyText);
 
-    // ✅ TWILIO XML RESPONSE
-    const twiml = `
-<Response>
-<Message>${reply}</Message>
-</Response>`;
+    // ===============================
+    // TWIML RESPONSE (MANDATORY)
+    // ===============================
+    const twimlResponse = `
+      <Response>
+        <Message>${escapeXml(replyText)}</Message>
+      </Response>
+    `;
 
     res.set("Content-Type", "text/xml");
-    res.send(twiml);
+    res.send(twimlResponse);
 
   } catch (error) {
     console.error("❌ ERROR:", error);
-    res.sendStatus(200);
+
+    const fallback = `
+      <Response>
+        <Message>⚠️ Server error. Please try again later.</Message>
+      </Response>
+    `;
+
+    res.set("Content-Type", "text/xml");
+    res.send(fallback);
   }
 });
+
+// ===============================
+// XML ESCAPE (IMPORTANT)
+// ===============================
+function escapeXml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+// ===============================
+// SERVER START (Render PORT)
+// ===============================
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
